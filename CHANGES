@@ -1,0 +1,10 @@
+1.1.0 (Jan. 26, 2016)
+
+    * Changed from using winsound.PlaySound on Windows to windll.winmm.
+      Appears to be just as common as winsound, and has the advantage of playing
+      more file formats, such as MP3, than winsound (which only plays WAVE as
+      far as I can tell).
+
+1.0.0 (Jan. 24, 2016)
+
+    * Initial commit
