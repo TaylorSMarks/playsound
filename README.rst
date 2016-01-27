@@ -15,8 +15,8 @@ Done.
 If you insist on the (slightly) harder way of installing, from source,
 you know how to do it already and don't need my help.
 
-This library might be uploaded to github at some point at
-https://github.com/TaylorSMarks
+The latest version of the source code can be found at:
+https://github.com/TaylorSMarks/playsound
 
 Quick Start
 -----------
