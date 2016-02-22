@@ -31,7 +31,7 @@ Documentation
 -------------
 The playsound module contains only one thing - the function (also named) playsound.
 
-It requires one argument - the path to the file with the sound you'd like to play.
+It requires one argument - the path to the file with the sound you'd like to play. This may be a local file, or a URL.
 
 There's an optional second argument, block, which is set to True by default. Setting it to False makes the function run asynchronously.
 

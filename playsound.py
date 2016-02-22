@@ -51,10 +51,14 @@ def _playsoundOSX(sound, block = True):
 
     I never would have tried using AppKit.NSSound without seeing his code.
     '''
-    from AppKit import NSSound
-    from time   import sleep
+    from AppKit     import NSSound
+    from Foundation import NSURL
+    from time       import sleep
 
-    sound = NSSound.alloc().initWithContentsOfFile_byReference_(sound, True)
+    if '://' not in sound:
+        sound = 'file://' + sound
+    url   = NSURL.URLWithString_(sound)
+    sound = NSSound.alloc().initWithContentsOfURL_byReference_(url, True)
     sound.play()
 
     if block:
