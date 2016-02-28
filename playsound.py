@@ -56,6 +56,9 @@ def _playsoundOSX(sound, block = True):
     from time       import sleep
 
     if '://' not in sound:
+        if not sound.startswith('/'):
+            from os import getcwd
+            sound = getcwd() + '/' + sound
         sound = 'file://' + sound
     url   = NSURL.URLWithString_(sound)
     sound = NSSound.alloc().initWithContentsOfURL_byReference_(url, True)

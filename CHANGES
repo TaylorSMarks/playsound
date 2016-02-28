@@ -1,3 +1,7 @@
+1.2.1 (Feb. 27, 2016)
+
+    * Fixes bug that prevented relative paths from working on OS X.
+
 1.2.0 (Feb. 20, 2016)
 
     * Now uses   NSSound.initWithContentsOfURL_byReference_ on OS X
