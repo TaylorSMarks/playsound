@@ -25,8 +25,8 @@ def _playsoundWin(sound, block = True):
             errorBuffer = c_buffer(255)
             windll.winmm.mciGetErrorStringA(errorCode, errorBuffer, 254)
             exceptionMessage = ('\n    Error ' + str(errorCode) + ' for command:'
-                                '\n        ' + command +
-                                '\n    ' + errorBuffer.value)
+                                '\n        ' + command.decode() +
+                                '\n    ' + errorBuffer.value.decode())
             raise PlaysoundException(exceptionMessage)
         return buf.value
 
@@ -34,7 +34,7 @@ def _playsoundWin(sound, block = True):
     winCommand('open "' + sound + '" alias', alias)
     winCommand('set', alias, 'time format milliseconds')
     durationInMS = winCommand('status', alias, 'length')
-    winCommand('play', alias, 'from 0 to', durationInMS)
+    winCommand('play', alias, 'from 0 to', durationInMS.decode())
 
     if block:
         sleep(float(durationInMS) / 1000.0)
