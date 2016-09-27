@@ -16,10 +16,11 @@ def _playsoundWin(sound, block = True):
     from ctypes import c_buffer, windll
     from random import random
     from time   import sleep
+    from sys    import getfilesystemencoding
 
     def winCommand(*command):
         buf = c_buffer(255)
-        command = ' '.join(command).encode()
+        command = ' '.join(command).encode(getfilesystemencoding())
         errorCode = int(windll.winmm.mciSendStringA(command, buf, 254, 0))
         if errorCode:
             errorBuffer = c_buffer(255)
