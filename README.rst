@@ -2,21 +2,7 @@ playsound
 =========
 *Pure Python, cross platform, single function module with no dependencies for playing sounds.*
 
-Installation
-------------
-Install via pip:
-
-.. code-block:: bash
-
-    $ pip install playsound
-
-Done.
-
-If you insist on the (slightly) harder way of installing, from source,
-you know how to do it already and don't need my help.
-
-The latest version of the source code can be found at:
-https://github.com/TaylorSMarks/playsound
+Forked from TaylorSMarks/playsound - https://github.com/TaylorSMarks/playsound
 
 Quick Start
 -----------
@@ -43,9 +29,7 @@ On Linux, uses ossaudiodev. I don't have a machine with Linux, so this hasn't be
 
 Requirements
 ------------
-I've only tested playsound it with Python 2.7 on Windows 7 and OS X 10.11, but
-I expect that it should work on Windows XP thru 10 at least, OS X 10.5 and newer,
-all versions of Linux, and Python 2.3 and newer.
+I've tested playsound it with Python 3.4 on Windows 7.
 
 Copyright
 ---------

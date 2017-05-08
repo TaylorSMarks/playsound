@@ -80,7 +80,7 @@ def _playsoundNix(sound, block = True):
     import ossaudiodev
     from sys  import byteorder
     from wave import open as waveOpen, AFMT_S16_LE, AFMT_S16_BE
-    
+
     with waveOpen(sound, 'rb') as sound:
         channelCount, sampleWidth, framerate, frameCount, compressionType, compressionName = sound.getparams()
         try:
