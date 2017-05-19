@@ -103,7 +103,7 @@ def _playsoundNix(sound, block=True):
         raise PlaysoundException(
             "playbin.set_state returned " + repr(set_result))
 
-    # FIXME: figure use some other bus method than poll() with block=False
+    # FIXME: use some other bus method than poll() with block=False
     # https://lazka.github.io/pgi-docs/#Gst-1.0/classes/Bus.html
     bus = playbin.get_bus()
     bus.poll(Gst.MessageType.EOS, Gst.CLOCK_TIME_NONE)
