@@ -79,6 +79,7 @@ def _playsoundNix(sound, block=True):
             "block=False cannot be used on this platform yet")
 
     # pathname2url escapes non-URL-safe characters
+    import os
     try:
         from urllib.request import pathname2url
     except ImportError:
@@ -92,10 +93,10 @@ def _playsoundNix(sound, block=True):
     Gst.init(None)
 
     playbin = Gst.ElementFactory.make('playbin', 'playbin')
-    if sound.startswith('/'):
-        playbin.props.uri = 'file://' + pathname2url(sound)
-    else:
+    if sound.startswith(('http://', 'https://')):
         playbin.props.uri = sound
+    else:
+        playbin.props.uri = 'file://' + pathname2url(os.path.abspath(sound))
 
     set_result = playbin.set_state(Gst.State.PLAYING)
     if set_result != Gst.StateChangeReturn.ASYNC:
