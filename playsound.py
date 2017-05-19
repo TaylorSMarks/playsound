@@ -68,34 +68,47 @@ def _playsoundOSX(sound, block = True):
     if block:
         sleep(sound.duration())
 
-def _playsoundNix(sound, block = True):
-    '''
-    Utilizes ossaudiodev. Untested. Probably works with all version of Linux
-    with Python 2.3 or newer.
+def _playsoundNix(sound, block=True):
+    """Play a sound using GStreamer.
 
-    Inspired by, and more or less copied from, Bill Dandreta's post on
-    this mailing list (since deleted, so I link to a web archive instead):
-    https://web.archive.org/web/20080218155209/http://mail.python.org/pipermail/python-list/2004-October/288905.html
-    '''
-    import ossaudiodev
-    from sys  import byteorder
-    from wave import open as waveOpen, AFMT_S16_LE, AFMT_S16_BE
-    
-    with waveOpen(sound, 'rb') as sound:
-        channelCount, sampleWidth, framerate, frameCount, compressionType, compressionName = sound.getparams()
-        try:
-            from ossaudiodev import AFMT_S16_NE
-        except ImportError:
-            if 'little' in byteorder.lower():
-                AFMT_S16_NE = ossaudiodev.AFMT_S16_LE
-            else:
-                AFMT_S16_NE = ossaudiodev.AFMT_S16_BE
-        data = sound.readframes(frameCount)
+    Inspired by this:
+    https://gstreamer.freedesktop.org/documentation/tutorials/playback/playbin-usage.html
+    """
+    if not block:
+        raise NotImplementedError(
+            "block=False cannot be used on this platform yet")
 
-    speaker = ossaudiodev.open('/dev/dsp', 'w')
-    speaker.setparameters(AFMT_S16_NE, channelCount, framerate)
-    speaker.write(data)
-    speaker.close()
+    # pathname2url escapes non-URL-safe characters
+    import os
+    try:
+        from urllib.request import pathname2url
+    except ImportError:
+        # python 2
+        from urllib import pathname2url
+
+    import gi
+    gi.require_version('Gst', '1.0')
+    from gi.repository import Gst
+
+    Gst.init(None)
+
+    playbin = Gst.ElementFactory.make('playbin', 'playbin')
+    if sound.startswith(('http://', 'https://')):
+        playbin.props.uri = sound
+    else:
+        playbin.props.uri = 'file://' + pathname2url(os.path.abspath(sound))
+
+    set_result = playbin.set_state(Gst.State.PLAYING)
+    if set_result != Gst.StateChangeReturn.ASYNC:
+        raise PlaysoundException(
+            "playbin.set_state returned " + repr(set_result))
+
+    # FIXME: use some other bus method than poll() with block=False
+    # https://lazka.github.io/pgi-docs/#Gst-1.0/classes/Bus.html
+    bus = playbin.get_bus()
+    bus.poll(Gst.MessageType.EOS, Gst.CLOCK_TIME_NONE)
+    playbin.set_state(Gst.State.NULL)
+
 
 from platform import system
 system = system()
