@@ -61,11 +61,13 @@ def _playsoundOSX(sound, block = True):
             sound = getcwd() + '/' + sound
         sound = 'file://' + sound
     url   = NSURL.URLWithString_(sound)
-    sound = NSSound.alloc().initWithContentsOfURL_byReference_(url, True)
-    sound.play()
+    nssound = NSSound.alloc().initWithContentsOfURL_byReference_(url, True)
+    if not nssound:
+        raise IOError('Unable to load sound named: ' + sound)
+    nssound.play()
 
     if block:
-        sleep(sound.duration())
+        sleep(nssound.duration())
 
 def _playsoundNix(sound, block = True):
     '''
