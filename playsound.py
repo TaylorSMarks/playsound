@@ -36,11 +36,9 @@ def _playsoundWin(sound, block = True):
     winCommand('set', alias, 'time format milliseconds')
     durationInMS = winCommand('status', alias, 'length')
     winCommand('play', alias, 'from 0 to', durationInMS.decode())
-    sleep(float(durationInMS) / 1000.0)
-    winCommand('close', alias)
-
     if block:
         sleep(float(durationInMS) / 1000.0)
+    winCommand('close', alias)
 
 def _playsoundOSX(sound, block = True):
     '''
