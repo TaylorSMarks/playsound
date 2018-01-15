@@ -36,4 +36,5 @@ setup(name             = 'playsound',
                           'Topic :: Multimedia :: Sound/Audio :: Players',
                           'Topic :: Multimedia :: Sound/Audio :: Players :: MP3'],
       keywords         = 'sound playsound music wave wav mp3 media song play audio',
-      py_modules       = ['playsound'])
+      py_modules       = ['playsound']
+      install_requires = ['pyobjc;platform_system=="Darwin"'])
