@@ -20,7 +20,10 @@ def _playsoundWin(sound, block = True):
 
     def winCommand(*command):
         buf = c_buffer(255)
-        command = ' '.join(command).encode(getfilesystemencoding())
+        command = ' '.join(
+            c.decode('utf-8') if not isinstance(c, str)
+            else c for c in command
+        ).encode()
         errorCode = int(windll.winmm.mciSendStringA(command, buf, 254, 0))
         if errorCode:
             errorBuffer = c_buffer(255)
