@@ -36,7 +36,10 @@ def _playsoundWin(sound, block = True):
     winCommand('set', alias, 'time format milliseconds')
     durationInMS = winCommand('status', alias, 'length')
     winCommand('play', alias, 'from 0 to', durationInMS.decode())
-
+    _fileStatus=winCommand('status', alias, 'mode')
+    while(_fileStatus.decode()=='playing'):
+        _fileStatus=winCommand('status', alias, 'mode')
+        
     if block:
         sleep(float(durationInMS) / 1000.0)
 
