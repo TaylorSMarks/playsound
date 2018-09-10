@@ -39,7 +39,7 @@ def _playsoundWin(sound, block = True):
     _fileStatus=winCommand('status', alias, 'mode')
     while(_fileStatus.decode()=='playing'):
         _fileStatus=winCommand('status', alias, 'mode')
-        
+    winCommand('close', alias)    
     if block:
         sleep(float(durationInMS) / 1000.0)
 
