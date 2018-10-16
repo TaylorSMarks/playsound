@@ -25,15 +25,18 @@ Once you've installed, you can really quickly verified that it works with just t
 .. code-block:: python
 
     >>> from playsound import playsound
-    >>> playsound('/path/to/a/sound/file/you/want/to/play.mp3') 
+    >>> p = playsound()
+    >>> p.play('/path/to/a/sound/file/you/want/to/play.mp3') 
 
 Documentation
 -------------
-The playsound module contains only one thing - the function (also named) playsound.
+The playsound module contains only one thing - a class named 'playsound'.
 
-It requires one argument - the path to the file with the sound you'd like to play. This may be a local file, or a URL.
+Method 'play' requires one argument - the path to the file with the sound you'd like to play. This may be a local file, or a URL.
 
 There's an optional second argument, block, which is set to True by default. Setting it to False makes the function run asynchronously.
+
+On Windows there si also support to stop the playing sound using 'stop' method.
 
 On Windows, uses windll.winmm. WAVE and MP3 have been tested and are known to work. Other file formats may work as well.
 
