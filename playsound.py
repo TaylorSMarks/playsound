@@ -45,7 +45,8 @@ class playsoundBase(ABC):
 
 
 class playsoundWin(playsoundBase):
-    alias = ''
+    alias = 'playsound_alias'
+    mcierr_duplicate_alias = 'Error 289 for command'
 
     def winCommand(self, *command):
         buf = c_buffer(255)
@@ -60,9 +61,15 @@ class playsoundWin(playsoundBase):
             raise PlaysoundException(exceptionMessage)
         return buf.value
 
-    def play(self, sound, block=True):
-        self.alias = 'playsound_' + str(random())
-        self.winCommand('open "' + sound + '" alias', self.alias)
+    def play(self, sound, block=True, random_alias=True):
+        if random_alias is True:
+            self.alias = 'playsound_' + str(random())
+        try:
+            self.winCommand('open "' + sound + '" alias', self.alias)
+        except PlaysoundException as e:
+            # ignore duplicate alias
+            if self.mcierr_duplicate_alias not in str(e):
+                raise e
         self.winCommand('set', self.alias, 'time format milliseconds')
         durationInMS = self.winCommand('status', self.alias, 'length')
         self.winCommand('play', self.alias, 'from 0 to', durationInMS.decode())
