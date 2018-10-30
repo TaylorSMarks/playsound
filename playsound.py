@@ -6,7 +6,7 @@ operating_system = system()
 if operating_system == 'Windows':
     from ctypes import c_buffer, windll
     from random import random
-    from time import sleep
+    from time import sleep, time
     from sys import getfilesystemencoding
 elif operating_system == 'Darwin':
     from AppKit import NSSound
@@ -45,8 +45,23 @@ class playsoundBase(ABC):
 
 
 class playsoundWin(playsoundBase):
-    alias = 'playsound_alias'
     mcierr_duplicate_alias = 'Error 289 for command'
+
+    def __init__(self):
+        self.alias = 'playsound_alias'
+        self.stop_sound = False
+
+    def close_alias(self):
+        """
+        For cleanup purpose : will try to close an existing alias.
+        """
+        try:
+            self.winCommand('close', self.alias)
+        except:
+            pass
+
+    def stop_audio(self):
+        self.winCommand('stop', self.alias)
 
     def winCommand(self, *command):
         buf = c_buffer(255)
@@ -61,9 +76,10 @@ class playsoundWin(playsoundBase):
             raise PlaysoundException(exceptionMessage)
         return buf.value
 
-    def play(self, sound, block=True, random_alias=True):
-        if random_alias is True:
-            self.alias = 'playsound_' + str(random())
+    def play(self, sound, block=True, alias=None):
+        if alias:
+            self.alias = alias
+        self.close_alias()
         try:
             self.winCommand('open "' + sound + '" alias', self.alias)
         except PlaysoundException as e:
@@ -73,13 +89,19 @@ class playsoundWin(playsoundBase):
         self.winCommand('set', self.alias, 'time format milliseconds')
         durationInMS = self.winCommand('status', self.alias, 'length')
         self.winCommand('play', self.alias, 'from 0 to', durationInMS.decode())
-
         if block:
-            sleep(float(durationInMS) / 1000.0)
+            self.stop_sound = False
+            start_time = time()
+            while time() - start_time < float(durationInMS) / 1000.0:
+                sleep(0.1)
+                if self.stop_sound is True:
+                    self.stop_audio()
+                    self.stop_sound = False
+                    break
 
     def stop(self):
-        self.winCommand('stop', self.alias)
-
+        self.stop_sound = True
+        self.stop_audio()
 
 class playsoundOSX(playsoundBase):
     def play(self, sound, block=True):
