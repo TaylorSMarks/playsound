@@ -55,7 +55,8 @@ def _playsoundOSX(sound, block = True):
     from AppKit     import NSSound
     from Foundation import NSURL
     from time       import sleep
-
+    
+    sound = sound.replace(" ", "%20")
     if '://' not in sound:
         if not sound.startswith('/'):
             from os import getcwd
