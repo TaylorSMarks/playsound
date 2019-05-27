@@ -13,11 +13,25 @@ def _playsoundWin(sound, block = True):
 
     I never would have tried using windll.winmm without seeing his code.
     '''
+    import _thread as thread # needed for async playback while maintaining file closure
     from ctypes import c_buffer, windll
     from random import random
     from time   import sleep
     from sys    import getfilesystemencoding
-
+    
+    def play_async_sound(sound):
+        """
+        Thread function that plays sound asynchronously (block=False)
+        Called by the _thread module
+        """
+        alias = 'playsound_' + str(random())
+        winCommand('open "' + sound + '" alias', alias)
+        winCommand('set', alias, 'time format milliseconds')
+        durationInMS = winCommand('status', alias, 'length')
+        winCommand('play', alias, 'from 0 to', durationInMS.decode())
+        sleep(float(durationInMS) / 1000.0)
+        winCommand('close', alias) # must close the soundfile or other python libraries won't be able to interact with the file
+    
     def winCommand(*command):
         buf = c_buffer(255)
         command = ' '.join(command).encode(getfilesystemencoding())
@@ -30,15 +44,17 @@ def _playsoundWin(sound, block = True):
                                 '\n    ' + errorBuffer.value.decode())
             raise PlaysoundException(exceptionMessage)
         return buf.value
-
-    alias = 'playsound_' + str(random())
-    winCommand('open "' + sound + '" alias', alias)
-    winCommand('set', alias, 'time format milliseconds')
-    durationInMS = winCommand('status', alias, 'length')
-    winCommand('play', alias, 'from 0 to', durationInMS.decode())
-
+    
     if block:
+        alias = 'playsound_' + str(random())
+        winCommand('open "' + sound + '" alias', alias)
+        winCommand('set', alias, 'time format milliseconds')
+        durationInMS = winCommand('status', alias, 'length')
+        winCommand('play', alias, 'from 0 to', durationInMS.decode())
         sleep(float(durationInMS) / 1000.0)
+        winCommand('close', alias) # must close the soundfile or other python libraries won't be able to interact with the file
+    else:
+        thread.start_new_thread(play_async_sound,(sound,))
 
 def _playsoundOSX(sound, block = True):
     '''
