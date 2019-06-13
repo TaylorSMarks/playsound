@@ -13,6 +13,7 @@ def _playsoundWin(sound, block = True):
 
     I never would have tried using windll.winmm without seeing his code.
     '''
+    import string
     from ctypes import c_buffer, windll
     from random import random
     from time   import sleep
@@ -28,10 +29,11 @@ def _playsoundWin(sound, block = True):
             exceptionMessage = ('\n    Error ' + str(errorCode) + ' for command:'
                                 '\n        ' + command +
                                 '\n    ' + errorBuffer.raw.decode('utf-16').rstrip('\0'))
+            
             raise PlaysoundException(exceptionMessage)
         return buf.raw.decode('utf-16').rstrip('\0')
 
-    alias = 'playsound_' + str(random())
+    alias = ('playsound_' + str(random()))[:28]  # Avoid aliases longer then 28
     winCommand('open "' + sound + '" alias', alias)
     winCommand('set', alias, 'time format milliseconds')
     durationInMS = winCommand('status', alias, 'length')
