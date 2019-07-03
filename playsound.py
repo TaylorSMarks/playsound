@@ -95,10 +95,8 @@ def _playsoundNix(sound, block=True):
     Gst.init(None)
 
     playbin = Gst.ElementFactory.make('playbin', 'playbin')
-    if sound.startswith(('http://', 'https://')):
-        playbin.props.uri = sound
-    else:
-        playbin.props.uri = 'file://' + pathname2url(os.path.abspath(sound))
+    playbin.props.uri = sound if sound.startswith(('http://', 'https://')) else\
+                        'file://' + pathname2url(os.path.abspath(sound))
 
     set_result = playbin.set_state(Gst.State.PLAYING)
     if set_result != Gst.StateChangeReturn.ASYNC:
@@ -115,11 +113,8 @@ def _playsoundNix(sound, block=True):
 from platform import system
 system = system()
 
-if system == 'Windows':
-    playsound = _playsoundWin
-elif system == 'Darwin':
-    playsound = _playsoundOSX
-else:
-    playsound = _playsoundNix
+playsound = _playsoundWin if system == 'Windows' else\
+            _playsoundOSX if system == 'Darwin'  else\
+            _playsoundNix
 
 del system
