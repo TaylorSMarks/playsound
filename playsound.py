@@ -76,9 +76,6 @@ def _playsoundNix(sound, block=True):
     Inspired by this:
     https://gstreamer.freedesktop.org/documentation/tutorials/playback/playbin-usage.html
     """
-    if not block:
-        raise NotImplementedError(
-            "block=False cannot be used on this platform yet")
 
     # pathname2url escapes non-URL-safe characters
     import os
@@ -104,12 +101,23 @@ def _playsoundNix(sound, block=True):
     if set_result != Gst.StateChangeReturn.ASYNC:
         raise PlaysoundException(
             "playbin.set_state returned " + repr(set_result))
-
-    # FIXME: use some other bus method than poll() with block=False
-    # https://lazka.github.io/pgi-docs/#Gst-1.0/classes/Bus.html
     bus = playbin.get_bus()
-    bus.poll(Gst.MessageType.EOS, Gst.CLOCK_TIME_NONE)
-    playbin.set_state(Gst.State.NULL)
+    if block:
+        bus.poll(Gst.MessageType.EOS, Gst.CLOCK_TIME_NONE)
+        playbin.set_state(Gst.State.NULL)
+    else:
+        bus.add_signal_watch()
+
+        def on_message(bus, message):
+            t = message.type
+            if t == Gst.MessageType.EOS:
+                playbin.set_state(Gst.State.NULL)
+            elif t == Gst.MessageType.ERROR:
+                playbin.set_state(Gst.State.NULL)
+                err, debug = message.parse_error()
+                print ("Error: %s" % err, debug)
+
+        bus.connect("message", on_message)
 
 
 from platform import system
