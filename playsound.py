@@ -7,49 +7,49 @@ def _playsoundWin(sound, block = True):
     Windows 7 with Python 2.7. Probably works with more file formats.
     Probably works on Windows XP thru Windows 10. Probably works with all
     versions of Python.
-
     Inspired by (but not copied from) Michael Gundlach <gundlach@gmail.com>'s mp3play:
     https://github.com/michaelgundlach/mp3play
-
     I never would have tried using windll.winmm without seeing his code.
     '''
     from ctypes import c_buffer, windll
-    from random import random
+    from random import randint
     from time   import sleep
-    from sys    import getfilesystemencoding
 
     def winCommand(*command):
-        buf = c_buffer(255)
-        command = ' '.join(command).encode(getfilesystemencoding())
-        errorCode = int(windll.winmm.mciSendStringA(command, buf, 254, 0))
+        buf = c_buffer(512)
+        command = ' '.join(command).encode('utf-16')
+        #command = ' '.join(command).encode(encoding)
+        errorCode = int(windll.winmm.mciSendStringW(command, buf, 511, 0))  # use widestring version of the function
         if errorCode:
-            errorBuffer = c_buffer(255)
-            windll.winmm.mciGetErrorStringA(errorCode, errorBuffer, 254)
+            errorBuffer = c_buffer(512)
+            windll.winmm.mciGetErrorStringW(errorCode, errorBuffer, 511)  # use widestring version of the function
             exceptionMessage = ('\n    Error ' + str(errorCode) + ' for command:'
-                                '\n        ' + command.decode() +
-                                '\n    ' + errorBuffer.value.decode())
+                                '\n        ' + command.decode('utf-16') +
+                                '\n    ' + errorBuffer.value.decode('utf-16'))
             raise PlaysoundException(exceptionMessage)
         return buf.value
 
-    alias = 'playsound_' + str(random())
-    winCommand('open "' + sound + '" alias', alias)
-    winCommand('set', alias, 'time format milliseconds')
-    durationInMS = winCommand('status', alias, 'length')
-    winCommand('play', alias, 'from 0 to', durationInMS.decode())
+    #WRONG!WRONG!WRONG!
+    #alias = 'playsound_' + str(randint(1,1000))
+    winCommand('open "' + sound +'"')
+    #WRONG!WRONG!WRONG!
+    #winCommand('open "' + sound +'"'+ '" alias', alias)
+    #winCommand('set', alias, 'time format milliseconds')
+    durationInMS = winCommand('status', sound, 'length')
+    winCommand('play', sound)
+    #WRONG!WRONG!WRONG!
+    #winCommand('play', sound, 'from 0 to', durationInMS.decode())
 
     if block:
-        sleep(float(durationInMS) / 1000.0)
-
+        sleep(float(durationInMS)*15)
 def _playsoundOSX(sound, block = True):
     '''
     Utilizes AppKit.NSSound. Tested and known to work with MP3 and WAVE on
     OS X 10.11 with Python 2.7. Probably works with anything QuickTime supports.
     Probably works on OS X 10.5 and newer. Probably works with all versions of
     Python.
-
     Inspired by (but not copied from) Aaron's Stack Overflow answer here:
     http://stackoverflow.com/a/34568298/901641
-
     I never would have tried using AppKit.NSSound without seeing his code.
     '''
     from AppKit     import NSSound
@@ -72,7 +72,6 @@ def _playsoundOSX(sound, block = True):
 
 def _playsoundNix(sound, block=True):
     """Play a sound using GStreamer.
-
     Inspired by this:
     https://gstreamer.freedesktop.org/documentation/tutorials/playback/playbin-usage.html
     """
@@ -123,3 +122,10 @@ else:
     playsound = _playsoundNix
 
 del system
+
+#Test code
+#import os
+#os.chdir("C:/Users/朋友的朋")
+#                   ^
+#             Chinese at there
+#playsound("hello.mp3")
