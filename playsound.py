@@ -14,34 +14,37 @@ def _playsoundWin(sound, block = True):
     from ctypes import c_buffer, windll
     from random import randint
     from time   import sleep
+    from sys    import getfilesystemencoding
+    #from locale import getpreferredencoding
 
     def winCommand(*command):
-        buf = c_buffer(512)
+        buf = c_buffer(600)
+        encoding=getfilesystemencoding()
         command = ' '.join(command).encode('utf-16')
         #command = ' '.join(command).encode(encoding)
-        errorCode = int(windll.winmm.mciSendStringW(command, buf, 511, 0))  # use widestring version of the function
+        errorCode = int(windll.winmm.mciSendStringW(command, buf, 600, 0))  # use widestring version of the function
         if errorCode:
-            errorBuffer = c_buffer(512)
-            windll.winmm.mciGetErrorStringW(errorCode, errorBuffer, 511)  # use widestring version of the function
+            errorBuffer = c_buffer(600)
+            windll.winmm.mciGetErrorStringW(errorCode, errorBuffer, 600)  # use widestring version of the function
             exceptionMessage = ('\n    Error ' + str(errorCode) + ' for command:'
                                 '\n        ' + command.decode('utf-16') +
+                                #'\n        ' + command.decode(encoding) +
                                 '\n    ' + errorBuffer.value.decode('utf-16'))
+                                #'\n    ' + errorBuffer.value.decode(encoding))
             raise PlaysoundException(exceptionMessage)
         return buf.value
 
-    #WRONG!WRONG!WRONG!
     #alias = 'playsound_' + str(randint(1,1000))
-    winCommand('open "' + sound +'"')
-    #WRONG!WRONG!WRONG!
-    #winCommand('open "' + sound +'"'+ '" alias', alias)
+    winCommand('open "' + sound + '" ')#alias', alias)
     #winCommand('set', alias, 'time format milliseconds')
-    durationInMS = winCommand('status', sound, 'length')
-    winCommand('play', sound)
-    #WRONG!WRONG!WRONG!
-    #winCommand('play', sound, 'from 0 to', durationInMS.decode())
+    durationInMS = winCommand('status "'+sound+'" length')
+    winCommand('play "'+ sound+'"')#, 'from 0 to', durationInMS.decode())
+    #winCommand("play",sound)
 
     if block:
         sleep(float(durationInMS)*15)
+        
+    winCommand('close "'+sound+'"')
 def _playsoundOSX(sound, block = True):
     '''
     Utilizes AppKit.NSSound. Tested and known to work with MP3 and WAVE on
@@ -122,10 +125,3 @@ else:
     playsound = _playsoundNix
 
 del system
-
-#Test code
-#import os
-#os.chdir("C:/Users/朋友的朋")
-#                   ^
-#             Chinese at there
-#playsound("hello.mp3")
