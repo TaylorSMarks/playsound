@@ -1,16 +1,23 @@
 class PlaysoundException(Exception):
     pass
 
-def _playsoundWin(sound, block = True):
+def _verify_duration(duration):
+    if duration != None:
+        data_type = type(duration)
+        if data_type == int:
+            if duration <= 0:
+                raise Exception('Duration Can\'t be less or equal to 0')
+        else:
+            raise Exception(f'Duration Can\'t be of {data_type} type')
+
+def _playsoundWin(sound, duration = None,block = True):
     '''
     Utilizes windll.winmm. Tested and known to work with MP3 and WAVE on
     Windows 7 with Python 2.7. Probably works with more file formats.
     Probably works on Windows XP thru Windows 10. Probably works with all
     versions of Python.
-
     Inspired by (but not copied from) Michael Gundlach <gundlach@gmail.com>'s mp3play:
     https://github.com/michaelgundlach/mp3play
-
     I never would have tried using windll.winmm without seeing his code.
     '''
     from ctypes import c_buffer, windll
@@ -31,25 +38,28 @@ def _playsoundWin(sound, block = True):
             raise PlaysoundException(exceptionMessage)
         return buf.value
 
+    _verify_duration(duration)
+
     alias = 'playsound_' + str(random())
     winCommand('open "' + sound + '" alias', alias)
     winCommand('set', alias, 'time format milliseconds')
     durationInMS = winCommand('status', alias, 'length')
     winCommand('play', alias, 'from 0 to', durationInMS.decode())
 
-    if block:
-        sleep(float(durationInMS) / 1000.0)
 
-def _playsoundOSX(sound, block = True):
+    if duration == None:
+        sleep(float(durationInMS) / 1000.0)
+    else:
+        sleep(duration)
+
+def _playsoundOSX(sound, duration = None, block = True):
     '''
     Utilizes AppKit.NSSound. Tested and known to work with MP3 and WAVE on
     OS X 10.11 with Python 2.7. Probably works with anything QuickTime supports.
     Probably works on OS X 10.5 and newer. Probably works with all versions of
     Python.
-
     Inspired by (but not copied from) Aaron's Stack Overflow answer here:
     http://stackoverflow.com/a/34568298/901641
-
     I never would have tried using AppKit.NSSound without seeing his code.
     '''
     from AppKit     import NSSound
@@ -65,14 +75,19 @@ def _playsoundOSX(sound, block = True):
     nssound = NSSound.alloc().initWithContentsOfURL_byReference_(url, True)
     if not nssound:
         raise IOError('Unable to load sound named: ' + sound)
+
+    _verify_duration(duration)
+
     nssound.play()
 
-    if block:
+    if duration == None:
         sleep(nssound.duration())
+    else:
+        sleep(duration)
 
-def _playsoundNix(sound, block=True):
+def _playsoundNix(sound, duration=10, block=True):
+    from time import sleep
     """Play a sound using GStreamer.
-
     Inspired by this:
     https://gstreamer.freedesktop.org/documentation/tutorials/playback/playbin-usage.html
     """
@@ -107,9 +122,17 @@ def _playsoundNix(sound, block=True):
 
     # FIXME: use some other bus method than poll() with block=False
     # https://lazka.github.io/pgi-docs/#Gst-1.0/classes/Bus.html
-    bus = playbin.get_bus()
-    bus.poll(Gst.MessageType.EOS, Gst.CLOCK_TIME_NONE)
-    playbin.set_state(Gst.State.NULL)
+
+    _verify_duration(duration)
+
+    if duration == None:
+        bus = playbin.get_bus()
+        bus.poll(Gst.MessageType.EOS, Gst.CLOCK_TIME_NONE)
+        playbin.set_state(Gst.State.NULL)
+    else:
+        sleep(duration)
+        playbin.set_state(Gst.State.NULL)
+
 
 
 from platform import system
