@@ -1,3 +1,4 @@
+[![Run on Repl.it](https://repl.it/badge/github/TaylorSMarks/playsound)](https://repl.it/github/TaylorSMarks/playsound)
 playsound
 =========
 *Pure Python, cross platform, single function module with no dependencies for playing sounds.*
