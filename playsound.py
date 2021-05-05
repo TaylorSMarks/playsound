@@ -18,6 +18,9 @@ def _playsoundWin(sound, block = True):
     from time   import sleep
     from sys    import getfilesystemencoding
 
+    # Compatibility with pathlib.Path and similar
+    sound = str(sound)
+
     def winCommand(*command):
         buf = c_buffer(255)
         command = ' '.join(command).encode(getfilesystemencoding())
@@ -56,6 +59,9 @@ def _playsoundOSX(sound, block = True):
     from Foundation import NSURL
     from time       import sleep
 
+    # Compatibility with pathlib.Path and similar
+    sound = str(sound)
+
     if '://' not in sound:
         if not sound.startswith('/'):
             from os import getcwd
@@ -91,6 +97,9 @@ def _playsoundNix(sound, block=True):
     import gi
     gi.require_version('Gst', '1.0')
     from gi.repository import Gst
+
+    # Compatibility with pathlib.Path and similar
+    sound = str(sound)
 
     Gst.init(None)
 
