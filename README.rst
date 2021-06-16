@@ -1,4 +1,4 @@
-playsound
+playsound -> soundplay, new fork
 =========
 *Pure Python, cross platform, single function module with no dependencies for playing sounds.*
 
