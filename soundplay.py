@@ -1,3 +1,6 @@
+#all credit given to Taylor S Marks copyright playsound and this is a fork of
+#his project.  This is the latest version as of 6/16/2021, but I made the
+#Linux OS have the async or block=False argument.
 class PlaysoundException(Exception):
     pass
 
@@ -7,10 +10,8 @@ def _playsoundWin(sound, block = True):
     Windows 7 with Python 2.7. Probably works with more file formats.
     Probably works on Windows XP thru Windows 10. Probably works with all
     versions of Python.
-
     Inspired by (but not copied from) Michael Gundlach <gundlach@gmail.com>'s mp3play:
     https://github.com/michaelgundlach/mp3play
-
     I never would have tried using windll.winmm without seeing his code.
     '''
     from ctypes import c_buffer, windll
@@ -46,10 +47,8 @@ def _playsoundOSX(sound, block = True):
     OS X 10.11 with Python 2.7. Probably works with anything QuickTime supports.
     Probably works on OS X 10.5 and newer. Probably works with all versions of
     Python.
-
     Inspired by (but not copied from) Aaron's Stack Overflow answer here:
     http://stackoverflow.com/a/34568298/901641
-
     I never would have tried using AppKit.NSSound without seeing his code.
     '''
     from AppKit     import NSSound
@@ -118,10 +117,10 @@ from platform import system
 system = system()
 
 if system == 'Windows':
-    playsound = _playsoundWin
+    soundplay = _playsoundWin
 elif system == 'Darwin':
-    playsound = _playsoundOSX
+    soundplay = _playsoundOSX
 else:
-    playsound = _playsoundNix
+    soundplay = _playsoundNix
 
 del system
