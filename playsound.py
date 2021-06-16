@@ -70,7 +70,7 @@ def _playsoundOSX(sound, block = True):
     if block:
         sleep(nssound.duration())
 
-def linuxPlay(sound, block):
+def linuxPlay(sound):
     """Play a sound using GStreamer.
     Inspired by this:
     https://gstreamer.freedesktop.org/documentation/tutorials/playback/playbin-usage.html
@@ -109,7 +109,7 @@ def linuxPlay(sound, block):
 
 def _playsoundNix(sound, block=True):
     from threading import Thread
-    T=Thread(target=lambda: linuxPlay(sound, block))
+    T=Thread(target=lambda: linuxPlay(sound))
     T.setDaemon(True)
     T.start()
     if block==True:T.join()
