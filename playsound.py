@@ -70,15 +70,11 @@ def _playsoundOSX(sound, block = True):
     if block:
         sleep(nssound.duration())
 
-def _playsoundNix(sound, block=True):
+def linuxPlay(sound, block):
     """Play a sound using GStreamer.
-
     Inspired by this:
     https://gstreamer.freedesktop.org/documentation/tutorials/playback/playbin-usage.html
     """
-    if not block:
-        raise NotImplementedError(
-            "block=False cannot be used on this platform yet")
 
     # pathname2url escapes non-URL-safe characters
     import os
@@ -111,6 +107,12 @@ def _playsoundNix(sound, block=True):
     bus.poll(Gst.MessageType.EOS, Gst.CLOCK_TIME_NONE)
     playbin.set_state(Gst.State.NULL)
 
+def _playsoundNix(sound, block=True):
+    from threading import Thread
+    T=Thread(target=lambda: linuxPlay(sound, block))
+    T.setDaemon(True)
+    T.start()
+    if block==True:T.join()
 
 from platform import system
 system = system()
