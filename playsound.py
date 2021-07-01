@@ -60,7 +60,7 @@ def _playsoundOSX(sound, block = True):
             from os import getcwd
             sound = getcwd() + '/' + sound
         sound = 'file://' + sound
-    sound.replace(' ', '%20')
+    sound   = sound.replace(' ', '%20')
     url     = NSURL.URLWithString_(sound)
     nssound = NSSound.alloc().initWithContentsOfURL_byReference_(url, True)
     if not nssound:
