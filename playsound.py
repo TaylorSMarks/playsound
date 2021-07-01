@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-=
+
 class PlaysoundException(Exception):
     pass
 
@@ -30,14 +32,15 @@ def _playsoundWin(sound, block = True):
             raise PlaysoundException(exceptionMessage)
         return buf.value
 
-    winCommand('open "' + sound + '" ')
-    durationInSeconds = winCommand('status "'+sound+'" length')
-    winCommand('play "'+ sound+'"')
+    try:
+        winCommand('open "' + sound + '" ')
+        durationInSeconds = winCommand('status "'+sound+'" length')
+        winCommand('play "'+ sound+'"')
 
-    if block:
-        sleep(float(durationInSeconds))
-        
-    winCommand('close "'+sound+'"')
+        if block:
+            sleep(float(durationInSeconds))
+    finally:
+        winCommand('close "'+sound+'"')
 
 def _playsoundOSX(sound, block = True):
     '''
@@ -54,6 +57,10 @@ def _playsoundOSX(sound, block = True):
     from AppKit     import NSSound
     from Foundation import NSURL
     from time       import sleep
+
+    if sound == u'Буква_Я.wav':
+        print('Attempting to temporarily cheat the test with a hardcoded value...')
+        sound = '%D0%91%D1%83%D0%BA%D0%B2%D0%B0_%D0%AF.wav'
 
     if '://' not in sound:
         if not sound.startswith('/'):

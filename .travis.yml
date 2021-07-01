@@ -7,12 +7,6 @@ jobs:
     - name: "Python 2.5 on Ubuntu 12 (Precise)"
       dist: precise
       python: 2.5
-    - name: "Python 3.9 on FreeBSD"
-      os: freebsd
-      python: 3.9
-    - name: "Python 2.7 on FreeBSD"
-      os: freebsd
-      python: 2.7
     - name: "Python 3.9 on macOS 11.3 (Big Sur)"
       os: osx
       osx_image: xcode12.5

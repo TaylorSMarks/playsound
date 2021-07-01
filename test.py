@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-=
 
+# On Mac, ignoring the issue of not having AppKit if it's not the stock version of Python, it's working for all but Cyrllic...
+# Just need to find out how to properly escape the name so that it works...
+
 from os      import listdir
 from os.path import join
 from sys     import version
@@ -8,7 +11,7 @@ from time    import time
 from playsound import playsound, PlaysoundException
 import unittest 
 
-durationMarginLow  = 0.2
+durationMarginLow  = 0.3
 duratingMarginHigh = 1.5
 
 class PlaysoundTests(unittest.TestCase):
