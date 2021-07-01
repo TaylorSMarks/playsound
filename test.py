@@ -1,13 +1,11 @@
+# -*- coding: utf-8 -*-
+
 from os      import listdir
 from os.path import join
 from time    import time
 
 from playsound import playsound, PlaysoundException
-import unittest
-
-# TODO:
-# 1 - Add Travis
-# 2 - See it work on Github 
+import unittest 
 
 durationMargin = 0.6
 
