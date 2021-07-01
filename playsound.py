@@ -55,15 +55,20 @@ def _playsoundOSX(sound, block = True):
     from Foundation import NSURL
     from time       import sleep
 
+    try:
+        from urllib.parse import quote  # Try the Python 3 import first...
+    except ImportError:
+        from urllib import quote  # Try using the Python 2 import before giving up entirely...
+
     if '://' not in sound:
         if not sound.startswith('/'):
             from os import getcwd
             sound = getcwd() + '/' + sound
         sound = 'file://' + sound
-    url   = NSURL.URLWithString_(sound)
+    url   = NSURL.URLWithString_(quote(sound))
     nssound = NSSound.alloc().initWithContentsOfURL_byReference_(url, True)
     if not nssound:
-        raise IOError('Unable to load sound named: ' + sound)
+        raise PlaysoundException('Cannot find a sound with filename: ' + sound)
     nssound.play()
 
     if block:

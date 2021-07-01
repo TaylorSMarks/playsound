@@ -2,6 +2,7 @@
 
 from os      import listdir
 from os.path import join
+from sys     import version
 from time    import time
 
 from playsound import playsound, PlaysoundException
@@ -28,8 +29,9 @@ class PlaysoundTests(unittest.TestCase):
 
             message = context.exception.message.lower()
 
-            for sub in ['cannot', 'find', 'filename']:
+            for sub in ['cannot', 'find', 'filename', 'notarealfile.wav']:
                 self.assertIn(sub, message.lower(), '"{}" was expected in the exception message, but instead got: "{}"'.format(sub, message))
 
 if __name__ == '__main__':
+    print(version)
     unittest.main()
