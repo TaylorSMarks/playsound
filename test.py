@@ -21,7 +21,7 @@ class PlaysoundTests(unittest.TestCase):
         print(path)
         playsound(path, block = block)
         duration = time() - startTime
-        self.assertTrue(approximateDuration - durationMarginLow <= duration <= approximateDuration + duratingMarginHigh, 'File "{}" took an unexpected amount of time: {}'.format(file, duration))
+        self.assertTrue(approximateDuration - durationMarginLow <= duration <= approximateDuration + duratingMarginHigh, 'File "{}" took an unexpected amount of time: {}'.format(file.encode('utf-8'), duration))
 
     testBlockingASCII_MP3 = lambda self: self.helper('Damonte.mp3', 1.1)
     testBlockingASCII_WAV = lambda self: self.helper('Sound4.wav',  1.3)

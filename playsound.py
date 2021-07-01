@@ -62,11 +62,23 @@ def _playsoundOSX(sound, block = True):
     from Foundation import NSURL
     from time       import sleep
 
+    try:
+        from urllib.parse import quote  # Try the Python 3 import first...
+    except ImportError:
+        from urllib import quote  # Try using the Python 2 import before giving up entirely...
+
+    quoted = quote(sound.encode('utf-8'))
+
     if sound == u'test_media/Буква_Я.wav':
         print('Attempting to temporarily cheat the test with a hardcoded value...')
         sound = 'test_media/%D0%91%D1%83%D0%BA%D0%B2%D0%B0_%D0%AF.wav'
+    
+    if quoted == sound:
+        print('quoted and sound are the same')
     else:
-        print('Testing with...')
+        print('quoted:')
+        print(repr(quoted))
+        print('sound:')
         print(repr(sound))
 
     if '://' not in sound:
