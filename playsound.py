@@ -64,8 +64,8 @@ def _playsoundOSX(sound, block = True):
         if not sound.startswith('/'):
             from os import getcwd
             sound = getcwd() + '/' + sound
-        sound = 'file://' + sound
-    url   = NSURL.URLWithString_(quote(sound))
+        sound = 'file:/' + sound
+    url   = NSURL.URLWithString_(quote(sound.encode('utf-8')))
     nssound = NSSound.alloc().initWithContentsOfURL_byReference_(url, True)
     if not nssound:
         raise PlaysoundException('Cannot find a sound with filename: ' + sound)

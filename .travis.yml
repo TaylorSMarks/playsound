@@ -13,11 +13,11 @@ jobs:
     - name: "Python 2.7 on FreeBSD"
       os: freebsd
       python: 2.7
-    - name: "Python ?.? on macOS 11.3 (Big Sur)"
+    - name: "Python 3.9 on macOS 11.3 (Big Sur)"
       os: osx
       osx_image: xcode12.5
       language: shell
-    - name: "Python ?.? on macOS 10.11 (El Capitan)"
+    - name: "Python 2.7 on macOS 10.11 (El Capitan)"
       os: osx
       osx_image: xcode7.3
       language: shell
