@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-=
-
 class PlaysoundException(Exception):
     pass
 
@@ -67,26 +65,12 @@ def _playsoundOSX(sound, block = True):
     except ImportError:
         from urllib import quote  # Try using the Python 2 import before giving up entirely...
 
-    quoted = quote(sound.encode('utf-8'))
-
-    if sound == u'test_media/Буква_Я.wav':
-        print('Attempting to temporarily cheat the test with a hardcoded value...')
-        sound = 'test_media/%D0%91%D1%83%D0%BA%D0%B2%D0%B0_%D0%AF.wav'
-    
-    if quoted == sound:
-        print('quoted and sound are the same')
-    else:
-        print('quoted:')
-        print(repr(quoted))
-        print('sound:')
-        print(repr(sound))
-
     if '://' not in sound:
         if not sound.startswith('/'):
             from os import getcwd
             sound = getcwd() + '/' + sound
         sound = 'file://' + sound
-    sound   = sound.replace(' ', '%20')
+    sound   = quote(sound.encode('utf-8')).replace(' ', '%20')
     url     = NSURL.URLWithString_(sound)
     nssound = NSSound.alloc().initWithContentsOfURL_byReference_(url, True)
     if not nssound:
