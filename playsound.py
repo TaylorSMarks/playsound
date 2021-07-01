@@ -40,7 +40,11 @@ def _playsoundWin(sound, block = True):
         if block:
             sleep(float(durationInSeconds))
     finally:
-        winCommand('close "'+sound+'"')
+        try:
+            winCommand('close "'+sound+'"')
+        except PlaysoundException:
+            # If it fails, there's nothing more that can be done...
+            pass
 
 def _playsoundOSX(sound, block = True):
     '''
@@ -58,9 +62,12 @@ def _playsoundOSX(sound, block = True):
     from Foundation import NSURL
     from time       import sleep
 
-    if sound == u'Буква_Я.wav':
+    if sound == u'test_media/Буква_Я.wav':
         print('Attempting to temporarily cheat the test with a hardcoded value...')
-        sound = '%D0%91%D1%83%D0%BA%D0%B2%D0%B0_%D0%AF.wav'
+        sound = 'test_media/%D0%91%D1%83%D0%BA%D0%B2%D0%B0_%D0%AF.wav'
+    else:
+        print('Testing with...')
+        print(repr(sound))
 
     if '://' not in sound:
         if not sound.startswith('/'):

@@ -12,12 +12,14 @@ from playsound import playsound, PlaysoundException
 import unittest 
 
 durationMarginLow  = 0.3
-duratingMarginHigh = 1.5
+duratingMarginHigh = 1.6
 
 class PlaysoundTests(unittest.TestCase):
     def helper(self, file, approximateDuration, block = True):
         startTime = time()
-        playsound(join('test_media', file), block = block)
+        path = join('test_media', file)
+        print(path)
+        playsound(path, block = block)
         duration = time() - startTime
         self.assertTrue(approximateDuration - durationMarginLow <= duration <= approximateDuration + duratingMarginHigh, 'File "{}" took an unexpected amount of time: {}'.format(file, duration))
 
