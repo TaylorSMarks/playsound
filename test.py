@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-=
 
 from os      import listdir
 from os.path import join
@@ -8,14 +8,15 @@ from time    import time
 from playsound import playsound, PlaysoundException
 import unittest 
 
-durationMargin = 0.6
+durationMarginLow  = 0.2
+duratingMarginHigh = 1.5
 
 class PlaysoundTests(unittest.TestCase):
     def helper(self, file, approximateDuration, block = True):
         startTime = time()
         playsound(join('test_media', file), block = block)
         duration = time() - startTime
-        self.assertTrue(approximateDuration - durationMargin <= duration <= approximateDuration + durationMargin, 'File "{}" took an unexpected amount of time: {}'.format(file, duration))
+        self.assertTrue(approximateDuration - durationMarginLow <= duration <= approximateDuration + duratingMarginHigh, 'File "{}" took an unexpected amount of time: {}'.format(file, duration))
 
     testBlockingASCII_MP3 = lambda self: self.helper('Damonte.mp3', 1.1)
     testBlockingASCII_WAV = lambda self: self.helper('Sound4.wav',  1.3)
