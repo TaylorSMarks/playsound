@@ -14,31 +14,30 @@ def _playsoundWin(sound, block = True):
     I never would have tried using windll.winmm without seeing his code.
     '''
     from ctypes import c_buffer, windll
-    from random import random
     from time   import sleep
-    from sys    import getfilesystemencoding
 
     def winCommand(*command):
-        buf = c_buffer(255)
-        command = ' '.join(command).encode(getfilesystemencoding())
-        errorCode = int(windll.winmm.mciSendStringA(command, buf, 254, 0))
+        bufLen = 600
+        buf = c_buffer(bufLen)
+        command = ' '.join(command).encode('utf-16')
+        errorCode = int(windll.winmm.mciSendStringW(command, buf, bufLen - 1, 0))  # use widestring version of the function
         if errorCode:
-            errorBuffer = c_buffer(255)
-            windll.winmm.mciGetErrorStringA(errorCode, errorBuffer, 254)
+            errorBuffer = c_buffer(bufLen)
+            windll.winmm.mciGetErrorStringW(errorCode, errorBuffer, bufLen - 1)  # use widestring version of the function
             exceptionMessage = ('\n    Error ' + str(errorCode) + ' for command:'
-                                '\n        ' + command.decode() +
-                                '\n    ' + errorBuffer.value.decode())
+                                '\n        ' + command.decode('utf-16') +
+                                '\n    ' + errorBuffer.raw.decode('utf-16').rstrip('\0'))
             raise PlaysoundException(exceptionMessage)
         return buf.value
 
-    alias = 'playsound_' + str(random())
-    winCommand('open "' + sound + '" alias', alias)
-    winCommand('set', alias, 'time format milliseconds')
-    durationInMS = winCommand('status', alias, 'length')
-    winCommand('play', alias, 'from 0 to', durationInMS.decode())
+    winCommand('open "' + sound + '" ')
+    durationInSeconds = winCommand('status "'+sound+'" length')
+    winCommand('play "'+ sound+'"')
 
     if block:
-        sleep(float(durationInMS) / 1000.0)
+        sleep(float(durationInSeconds))
+        
+    winCommand('close "'+sound+'"')
 
 def _playsoundOSX(sound, block = True):
     '''
@@ -70,7 +69,7 @@ def _playsoundOSX(sound, block = True):
     if block:
         sleep(nssound.duration())
 
-def _playsoundNix(sound, block=True):
+def _playsoundNix(sound, block = True):
     """Play a sound using GStreamer.
 
     Inspired by this:
