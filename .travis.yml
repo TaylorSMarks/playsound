@@ -19,7 +19,7 @@ jobs:
       os: windows
       language: shell
       before_install:
-        - choco install python --version 2.7.11
+        - pip install mock
     - name: "Python 3.9 on Windows"
       os: windows
       language: shell

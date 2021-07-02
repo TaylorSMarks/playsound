@@ -30,10 +30,14 @@ class PlaysoundTests(unittest.TestCase):
     def helper(self, file, approximateDuration, block = True):
         startTime = time()
         path = join('test_media', file)
-        print(path)
+        print(path.encode('utf-8'))
 
         if isTravis and system == 'Windows':
-            from unittest.mock import patch
+            try:
+                from unittest.mock import patch
+            except ImportError:
+                from mock import patch
+            
             with patch('ctypes.windll.winmm.mciSendStringW', side_effect = mockMciSendStringW):
                 global sawClose
                 sawClose = False
