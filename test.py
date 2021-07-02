@@ -13,7 +13,6 @@ system = system()
 isTravis = environ.get('TRAVIS', 'false') == 'true'
 
 from playsound import playsound, PlaysoundException
-from unittest.mock import patch
 import unittest
 
 durationMarginLow  = 0.3
@@ -34,11 +33,14 @@ class PlaysoundTests(unittest.TestCase):
         print(path)
 
         if isTravis and system == 'Windows':
+            from unittest.mock import patch
             with patch('ctypes.windll.winmm.mciSendStringW', side_effect = mockMciSendStringW):
                 global sawClose
                 sawClose = False
                 playsound(path, block = block)
                 self.assertTrue(sawClose)
+        else:
+            playsound(path, block = block)
         duration = time() - startTime
         self.assertTrue(approximateDuration - durationMarginLow <= duration <= approximateDuration + duratingMarginHigh, 'File "{}" took an unexpected amount of time: {}'.format(file.encode('utf-8'), duration))
 
