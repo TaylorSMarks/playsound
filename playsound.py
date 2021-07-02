@@ -31,15 +31,15 @@ def _playsoundWin(sound, block = True):
         return buf.value
 
     try:
-        winCommand('open "' + sound + '" ')
-        durationInSeconds = winCommand('status "'+sound+'" length')
-        winCommand('play "'+ sound+'"')
+        winCommand('open "{}"'.format(sound))
+        durationInSeconds = winCommand('status "{}" length'.format(sound))
+        winCommand('play "{}"'.format(sound))
 
         if block:
             sleep(float(durationInSeconds))
     finally:
         try:
-            winCommand('close "'+sound+'"')
+            winCommand('close "{}"'.format(sound))
         except PlaysoundException:
             # If it fails, there's nothing more that can be done...
             pass
@@ -70,7 +70,10 @@ def _playsoundOSX(sound, block = True):
             from os import getcwd
             sound = getcwd() + '/' + sound
         sound = 'file://' + sound
-    sound   = quote(sound.encode('utf-8')).replace(' ', '%20')
+
+    parts = sound.split('://', 1)
+
+    sound   = parts[0] + '://' + quote(parts[1].encode('utf-8')).replace(' ', '%20')
     url     = NSURL.URLWithString_(sound)
     nssound = NSSound.alloc().initWithContentsOfURL_byReference_(url, True)
     if not nssound:

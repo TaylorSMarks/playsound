@@ -3,23 +3,42 @@
 # On Mac, ignoring the issue of not having AppKit if it's not the stock version of Python, it's working for all but Cyrllic...
 # Just need to find out how to properly escape the name so that it works...
 
-from os      import listdir
-from os.path import join
-from sys     import version
-from time    import time
+from os       import environ, listdir
+from os.path  import join
+from platform import system
+from sys      import version
+from time     import time
+
+system = system()
+isTravis = environ.get('TRAVIS', 'false') == 'true'
 
 from playsound import playsound, PlaysoundException
-import unittest 
+from unittest.mock import patch
+import unittest
 
 durationMarginLow  = 0.3
 duratingMarginHigh = 1.6
+sawClose = False
+
+def mockMciSendStringW(command, buf, bufLen, bufStart):
+    if command.startswith('close '.encode('utf-16')):
+        global sawClose
+        sawClose = True
+    buf.value = b'2.1' # This is what it'll get for the duration in seconds for the file - it's close enough for all 4 of the test files.
+    return 0
 
 class PlaysoundTests(unittest.TestCase):
     def helper(self, file, approximateDuration, block = True):
         startTime = time()
         path = join('test_media', file)
         print(path)
-        playsound(path, block = block)
+
+        if isTravis and system == 'Windows':
+            with patch('ctypes.windll.winmm.mciSendStringW', side_effect = mockMciSendStringW):
+                global sawClose
+                sawClose = False
+                playsound(path, block = block)
+                self.assertTrue(sawClose)
         duration = time() - startTime
         self.assertTrue(approximateDuration - durationMarginLow <= duration <= approximateDuration + duratingMarginHigh, 'File "{}" took an unexpected amount of time: {}'.format(file.encode('utf-8'), duration))
 

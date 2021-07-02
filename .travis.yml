@@ -4,9 +4,9 @@ jobs:
     - name: "Python 3.9 on Ubuntu 18 (Bionic)"
       dist: bionic
       python: 3.9
-    - name: "Python 2.5 on Ubuntu 12 (Precise)"
+    - name: "Python 2.6 on Ubuntu 12 (Precise)"
       dist: precise
-      python: 2.5
+      python: 2.6
     - name: "Python 3.9 on macOS 11.3 (Big Sur)"
       os: osx
       osx_image: xcode12.5
