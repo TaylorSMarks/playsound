@@ -19,6 +19,9 @@ jobs:
       os: windows
       language: shell
       before_install:
+        - choco install python --version 2.7.11
+      env: PATH=/c/Python27:/c/Python27/Scripts:/c/tools/python:/c/tools/python/Scripts:$PATH
+      install:
         - python -m pip install mock
     - name: "Python 3.9 on Windows"
       os: windows
