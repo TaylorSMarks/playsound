@@ -12,6 +12,17 @@ from time     import time
 system = system()
 isTravis = environ.get('TRAVIS', 'false') == 'true'
 
+if isTravis and system == 'Windows':
+    try:
+        from unittest.mock import patch
+    except ImportError:
+        try:
+            from pip import main as pipmain
+        except ImportError:
+            from pip._internal import main as pipmain
+        pipmain(['install', 'mock'])
+        from mock import patch
+
 from playsound import playsound, PlaysoundException
 import unittest
 
@@ -33,11 +44,6 @@ class PlaysoundTests(unittest.TestCase):
         print(path.encode('utf-8'))
 
         if isTravis and system == 'Windows':
-            try:
-                from unittest.mock import patch
-            except ImportError:
-                from mock import patch
-            
             with patch('ctypes.windll.winmm.mciSendStringW', side_effect = mockMciSendStringW):
                 global sawClose
                 sawClose = False
