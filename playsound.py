@@ -59,6 +59,10 @@ def _playsoundOSX(sound, block = True):
     from AppKit     import NSSound
     from Foundation import NSURL
     from time       import sleep
+    from inspect    import getsourcefile
+
+    print(getsourcefile(NSURL))
+    print(getsourcefile(NSSound))
 
     try:
         from urllib.parse import quote  # Try the Python 3 import first...

@@ -20,7 +20,7 @@ if isTravis and system == 'Windows':
             from pip import main as pipmain
         except ImportError:
             from pip._internal import main as pipmain
-        pipmain(['install', 'mock'])
+        pipmain(['install', 'mock==2.0.0'])
         from mock import patch
 
 from playsound import playsound, PlaysoundException
