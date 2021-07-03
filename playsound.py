@@ -31,15 +31,15 @@ def _playsoundWin(sound, block = True):
         return buf.value
 
     try:
-        winCommand('open "{}"'.format(sound))
-        durationInSeconds = winCommand('status "{}" length'.format(sound))
-        winCommand('play "{}"'.format(sound))
+        winCommand(u'open "{}"'.format(sound))
+        durationInSeconds = winCommand(u'status "{}" length'.format(sound))
+        winCommand(u'play "{}"'.format(sound))
 
         if block:
             sleep(float(durationInSeconds))
     finally:
         try:
-            winCommand('close "{}"'.format(sound))
+            winCommand(u'close "{}"'.format(sound))
         except PlaysoundException:
             # If it fails, there's nothing more that can be done...
             pass
@@ -56,6 +56,10 @@ def _playsoundOSX(sound, block = True):
 
     I never would have tried using AppKit.NSSound without seeing his code.
     '''
+    import sys
+
+    print(sys.path)
+
     from AppKit     import NSSound
     from Foundation import NSURL
     from time       import sleep
