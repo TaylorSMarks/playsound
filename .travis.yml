@@ -11,10 +11,10 @@ jobs:
       os: osx
       osx_image: xcode12.5
       language: shell
-    #- name: "Python 2.7 on macOS 10.11 (El Capitan)"
-    #  os: osx
-    #  osx_image: xcode7.3
-    #  language: shell
+    - name: "Python 2.7 on macOS 10.11 (El Capitan)"
+      os: osx
+      osx_image: xcode7.3
+      language: shell
     - name: "Python 2.7 on Windows"
       os: windows
       language: shell

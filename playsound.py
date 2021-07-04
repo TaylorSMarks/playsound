@@ -58,6 +58,8 @@ def _playsoundOSX(sound, block = True):
     '''
     import sys
 
+    sys.path.append('/System/Library/Frameworks/Python.framework/Versions/2.7/Extras/lib/python/PyObjC')
+
     print(sys.path)
 
     from AppKit     import NSSound

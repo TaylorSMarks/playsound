@@ -20,6 +20,12 @@ if isTravis and system == 'Windows':
             from pip import main as pipmain
         except ImportError:
             from pip._internal import main as pipmain
+
+        # Before python 3.3 (including python 2.7.20 and earlier),
+        # mocking/patching wasn't part of the standard library. So you need
+        # to get those via pip. You specifically need version 2.0.0 - newer
+        # versions require python 3.3, utterly defeating the purpose of making
+        # the library available on pypi.
         pipmain(['install', 'mock==2.0.0'])
         from mock import patch
 
