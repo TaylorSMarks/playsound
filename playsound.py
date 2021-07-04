@@ -56,19 +56,17 @@ def _playsoundOSX(sound, block = True):
 
     I never would have tried using AppKit.NSSound without seeing his code.
     '''
-    import sys
+    try:
+        from AppKit import NSSound
+    except ImportError:
+        print("playsound could not find a copy of AppKit - falling back to using macOS's system copy.")
+        import sys
+        sys.path.append('/System/Library/Frameworks/Python.framework/Versions/2.7/Extras/lib/python/PyObjC')
+        from AppKit import NSSound
 
-    sys.path.append('/System/Library/Frameworks/Python.framework/Versions/2.7/Extras/lib/python/PyObjC')
-
-    print(sys.path)
-
-    from AppKit     import NSSound
     from Foundation import NSURL
     from time       import sleep
     from inspect    import getsourcefile
-
-    print(getsourcefile(NSURL))
-    print(getsourcefile(NSSound))
 
     try:
         from urllib.parse import quote  # Try the Python 3 import first...
@@ -88,10 +86,15 @@ def _playsoundOSX(sound, block = True):
     nssound = NSSound.alloc().initWithContentsOfURL_byReference_(url, True)
     if not nssound:
         raise PlaysoundException('Cannot find a sound with filename: ' + sound)
+    from time import time
+    startTime = time()
+    print('Starting playback of {} at {}'.format(sound, startTime))
     nssound.play()
 
     if block:
         sleep(nssound.duration())
+    endTime = time()
+    print('Returning from playback of {} at {} - real duration of {} vs reported of {}'.format(sound, endTime, startTime - endTime, nssound.duration()))
 
 def _playsoundNix(sound, block = True):
     """Play a sound using GStreamer.
