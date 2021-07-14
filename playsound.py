@@ -63,7 +63,7 @@ def _playsoundOSX(sound, block = True):
         import sys
         if sys.version_info[0] > 2:
             from importlib.util import spec_from_file_location, module_from_spec
-            spec = spec_from_file_location('objc._objc', '_objc.py')
+            spec = spec_from_file_location('objc._objc', '_objc.so')
             spec.loader.exec_module(module_from_spec(spec))
         sys.path.append('/System/Library/Frameworks/Python.framework/Versions/2.7/Extras/lib/python/PyObjC')
         from AppKit import NSSound
