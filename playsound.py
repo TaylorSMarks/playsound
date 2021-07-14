@@ -60,7 +60,7 @@ def _playsoundOSX(sound, block = True):
         from AppKit import NSSound
     except ImportError:
         print("playsound could not find a copy of AppKit - falling back to using macOS's system copy.")
-        #import sys
+        import sys
         #if sys.version_info[0] > 2:
             # TODO:
             #  This was fun, but lets just drop in the objc module here now...
