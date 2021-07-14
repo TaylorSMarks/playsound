@@ -60,16 +60,6 @@ def _playsoundOSX(sound, block = True):
         from AppKit import NSSound
     except ImportError:
         print("playsound could not find a copy of AppKit - falling back to using macOS's system copy.")
-        import sys
-        #if sys.version_info[0] > 2:
-            # TODO:
-            #  This was fun, but lets just drop in the objc module here now...
-            #  If we can successfully run on a Mac on Python 3, we should move the folders so they don't show up on other platforms.
-            #from importlib.util import spec_from_file_location, module_from_spec
-            #module_from_spec(spec_from_file_location('objc._convenience', '_convenience.py'))
-            #spec = spec_from_file_location('objc._objc', '_objc.so')
-            #spec.loader.load_module()
-            #spec.loader.exec_module(module_from_spec(spec))
         sys.path.append('/System/Library/Frameworks/Python.framework/Versions/2.7/Extras/lib/python/PyObjC')
         from AppKit import NSSound
 
@@ -148,6 +138,17 @@ def _playsoundNix(sound, block = True):
     bus.poll(Gst.MessageType.EOS, Gst.CLOCK_TIME_NONE)
     playbin.set_state(Gst.State.NULL)
 
+def _playsoundAnotherPython(otherPython, sound, block = True):
+    from inspect    import getsourcefile
+    from os.path    import abspath
+    from subprocess import call
+    from threading  import Thread
+
+    playsoundPath = abspath(getsourcefile(lambda: 0))
+    t = Thread(target = lambda: call([otherPython, playsoundPath, sound]))
+    t.start()
+    if block:
+        t.join()
 
 from platform import system
 system = system()
@@ -156,6 +157,13 @@ if system == 'Windows':
     playsound = _playsoundWin
 elif system == 'Darwin':
     playsound = _playsoundOSX
+    import sys
+    if sys.version_info[0] > 2:
+        try:
+            from AppKit import NSSound
+        except ImportError:
+            print("playsound is relying on a python 2 subprocess. Please use `pip3 install PyObjC` if you want playsound to run more efficiently.")
+            playsound = lambda sound, block: _playsoundAnotherPython('/System/Library/Frameworks/Python.framework/Versions/2.7/bin/python', sound, block)
 else:
     playsound = _playsoundNix
 

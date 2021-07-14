@@ -11,6 +11,7 @@ jobs:
       os: osx
       osx_image: xcode12.5
       language: shell
+      script: python3 test.py
     - name: "Python 2.7 on macOS 10.11 (El Capitan)"
       os: osx
       osx_image: xcode7.3
@@ -29,4 +30,4 @@ jobs:
       env: PATH=/c/Python39:/c/Python39/Scripts:$PATH
 install: true  # Makes it do nothing instead of trying to find a requirements.txt file.
 script:
-  - python3 test.py || python test.py
+  - python test.py
