@@ -33,7 +33,7 @@ from playsound import playsound, PlaysoundException
 import unittest
 
 durationMarginLow  = 0.3
-duratingMarginHigh = 1.6
+duratingMarginHigh = 2.0
 sawClose = False
 
 def mockMciSendStringW(command, buf, bufLen, bufStart):

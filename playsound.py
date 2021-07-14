@@ -44,6 +44,22 @@ def _playsoundWin(sound, block = True):
             # If it fails, there's nothing more that can be done...
             pass
 
+def _handlePathOSX(sound):
+    try:
+        from urllib.parse import quote  # Try the Python 3 import first...
+    except ImportError:
+        from urllib import quote  # Try using the Python 2 import before giving up entirely...
+
+    if '://' not in sound:
+        if not sound.startswith('/'):
+            from os import getcwd
+            sound = getcwd() + '/' + sound
+        sound = 'file://' + sound
+
+    parts = sound.split('://', 1)
+    return parts[0] + '://' + quote(parts[1].encode('utf-8')).replace(' ', '%20')
+
+
 def _playsoundOSX(sound, block = True):
     '''
     Utilizes AppKit.NSSound. Tested and known to work with MP3 and WAVE on
@@ -65,21 +81,8 @@ def _playsoundOSX(sound, block = True):
 
     from Foundation import NSURL
     from time       import sleep
-    from inspect    import getsourcefile
 
-    try:
-        from urllib.parse import quote  # Try the Python 3 import first...
-    except ImportError:
-        from urllib import quote  # Try using the Python 2 import before giving up entirely...
-
-    if '://' not in sound:
-        if not sound.startswith('/'):
-            from os import getcwd
-            sound = getcwd() + '/' + sound
-        sound = 'file://' + sound
-
-    parts = sound.split('://', 1)
-    sound = parts[0] + '://' + quote(parts[1].encode('utf-8')).replace(' ', '%20')
+    sound = _handlePathOSX(sound)
     url   = NSURL.URLWithString_(sound)
     if not url:
         raise PlaysoundException('Cannot find a sound with filename: ' + sound)
@@ -139,13 +142,21 @@ def _playsoundNix(sound, block = True):
     playbin.set_state(Gst.State.NULL)
 
 def _playsoundAnotherPython(otherPython, sound, block = True):
+    '''
+    Mostly written so that when this is run on python3 on macOS, it can invoke
+    python2 on macOS... but maybe this idea could be useful on linux, too.
+    '''
     from inspect    import getsourcefile
-    from os.path    import abspath
+    from os.path    import abspath, exists
     from subprocess import call
     from threading  import Thread
 
+    # Check if the file exists...
+    if not exists(abspath(sound)):
+        raise PlaysoundException('Cannot find a sound with filename: ' + sound)
+
     playsoundPath = abspath(getsourcefile(lambda: 0))
-    t = Thread(target = lambda: call([otherPython, playsoundPath, sound]))
+    t = Thread(target = lambda: call([otherPython, playsoundPath, _handlePathOSX(sound)]))
     t.start()
     if block:
         t.join()
@@ -163,7 +174,7 @@ elif system == 'Darwin':
             from AppKit import NSSound
         except ImportError:
             print("playsound is relying on a python 2 subprocess. Please use `pip3 install PyObjC` if you want playsound to run more efficiently.")
-            playsound = lambda sound, block: _playsoundAnotherPython('/System/Library/Frameworks/Python.framework/Versions/2.7/bin/python', sound, block)
+            playsound = lambda sound, block = True: _playsoundAnotherPython('/System/Library/Frameworks/Python.framework/Versions/2.7/bin/python', sound, block)
 else:
     playsound = _playsoundNix
 
