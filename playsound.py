@@ -62,8 +62,8 @@ def _playsoundOSX(sound, block = True):
         print("playsound could not find a copy of AppKit - falling back to using macOS's system copy.")
         import sys
         if sys.version_info[0] > 2:
-            from shutil import rename
-            rename('_objc.cpython-38-darwin.so', '_objc.so')
+            from shutil import move
+            move('_objc.cpython-38-darwin.so', '_objc.so')
         sys.path.append('/System/Library/Frameworks/Python.framework/Versions/2.7/Extras/lib/python/PyObjC')
         from AppKit import NSSound
 

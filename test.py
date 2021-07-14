@@ -61,7 +61,6 @@ class PlaysoundTests(unittest.TestCase):
         self.assertTrue(approximateDuration - durationMarginLow <= duration <= approximateDuration + duratingMarginHigh, 'File "{}" took an unexpected amount of time: {}'.format(file.encode('utf-8'), duration))
 
     testBlockingASCII_MP3 = lambda self: self.helper('Damonte.mp3', 1.1)
-    testBlockingAgain     = lambda self: self.helper('Damonte.mp3', 1.1)
     testBlockingASCII_WAV = lambda self: self.helper('Sound4.wav',  1.3)
     testBlockingCYRIL_WAV = lambda self: self.helper(u'Буква_Я.wav', 1.6)
     testBlockingSPACE_MP3 = lambda self: self.helper('Discovery - Go at throttle up (2).mp3', 2.3)
