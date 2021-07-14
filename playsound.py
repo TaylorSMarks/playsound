@@ -61,9 +61,6 @@ def _playsoundOSX(sound, block = True):
     except ImportError:
         print("playsound could not find a copy of AppKit - falling back to using macOS's system copy.")
         import sys
-        if sys.version_info[0] > 2:
-            from shutil import move
-            move('_objc.cpython-38-darwin.so', '_objc.so')
         sys.path.append('/System/Library/Frameworks/Python.framework/Versions/2.7/Extras/lib/python/PyObjC')
         from AppKit import NSSound
 
@@ -84,13 +81,17 @@ def _playsoundOSX(sound, block = True):
 
     parts = sound.split('://', 1)
     sound = parts[0] + '://' + quote(parts[1].encode('utf-8')).replace(' ', '%20')
-    print('The sound path is: ' + sound)
     url   = NSURL.URLWithString_(sound)
     if not url:
         raise PlaysoundException('Cannot find a sound with filename: ' + sound)
 
-    nssound = NSSound.alloc().initWithContentsOfURL_byReference_(url, True)
-    if not nssound:
+    for i in range(5):
+        nssound = NSSound.alloc().initWithContentsOfURL_byReference_(url, True)
+        if nssound:
+            break
+        else:
+            print('Failed to load sound, although url was good... ' + sound)
+    else:
         raise PlaysoundException('Could not load sound with filename, although URL was good... ' + sound)
     nssound.play()
 
