@@ -61,6 +61,13 @@ def _playsoundOSX(sound, block = True):
     except ImportError:
         print("playsound could not find a copy of AppKit - falling back to using macOS's system copy.")
         import sys
+        if sys.version_info[0] > 2:
+            # Then we need to find and copy over the file...
+            from shutil import move
+            pyObjC = '/System/Library/Frameworks/Python.framework/Versions/2.7/Extras/lib/python/PyObjC'
+            soFile = pyObjC + '/objc/_objc.so'
+            move(soFile,                       soFile + '.original')
+            move('_objc.cpython-38-darwin.so', soFile)
         sys.path.append('/System/Library/Frameworks/Python.framework/Versions/2.7/Extras/lib/python/PyObjC')
         from AppKit import NSSound
 
@@ -80,21 +87,18 @@ def _playsoundOSX(sound, block = True):
         sound = 'file://' + sound
 
     parts = sound.split('://', 1)
+    sound = parts[0] + '://' + quote(parts[1].encode('utf-8')).replace(' ', '%20')
+    url   = NSURL.URLWithString_(sound)
+    if not url:
+        raise PlaysoundException('Cannot find a sound with filename: ' + sound)
 
-    sound   = parts[0] + '://' + quote(parts[1].encode('utf-8')).replace(' ', '%20')
-    url     = NSURL.URLWithString_(sound)
     nssound = NSSound.alloc().initWithContentsOfURL_byReference_(url, True)
     if not nssound:
-        raise PlaysoundException('Cannot find a sound with filename: ' + sound)
-    from time import time
-    startTime = time()
-    print('Starting playback of {} at {}'.format(sound, startTime))
+        raise PlaysoundException('Could not load sound with filename: ' + sound)
     nssound.play()
 
     if block:
         sleep(nssound.duration())
-    endTime = time()
-    print('Returning from playback of {} at {} - real duration of {} vs reported of {}'.format(sound, endTime, startTime - endTime, nssound.duration()))
 
 def _playsoundNix(sound, block = True):
     """Play a sound using GStreamer.
@@ -149,3 +153,8 @@ else:
     playsound = _playsoundNix
 
 del system
+
+if __name__ == '__main__':
+    # block is always True if you choose to run this from the command line.
+    from sys import argv
+    playsound(argv[1])
