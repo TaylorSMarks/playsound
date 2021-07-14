@@ -62,12 +62,8 @@ def _playsoundOSX(sound, block = True):
         print("playsound could not find a copy of AppKit - falling back to using macOS's system copy.")
         import sys
         if sys.version_info[0] > 2:
-            # Then we need to find and copy over the file...
-            from shutil import move
-            pyObjC = '/System/Library/Frameworks/Python.framework/Versions/2.7/Extras/lib/python/PyObjC'
-            soFile = pyObjC + '/objc/_objc.so'
-            move(soFile,                       soFile + '.original')
-            move('_objc.cpython-38-darwin.so', soFile)
+            from shutil import rename
+            rename('_objc.cpython-38-darwin.so', '_objc.so')
         sys.path.append('/System/Library/Frameworks/Python.framework/Versions/2.7/Extras/lib/python/PyObjC')
         from AppKit import NSSound
 
@@ -88,13 +84,14 @@ def _playsoundOSX(sound, block = True):
 
     parts = sound.split('://', 1)
     sound = parts[0] + '://' + quote(parts[1].encode('utf-8')).replace(' ', '%20')
+    print('The sound path is: ' + sound)
     url   = NSURL.URLWithString_(sound)
     if not url:
         raise PlaysoundException('Cannot find a sound with filename: ' + sound)
 
     nssound = NSSound.alloc().initWithContentsOfURL_byReference_(url, True)
     if not nssound:
-        raise PlaysoundException('Could not load sound with filename: ' + sound)
+        raise PlaysoundException('Could not load sound with filename, although URL was good... ' + sound)
     nssound.play()
 
     if block:
