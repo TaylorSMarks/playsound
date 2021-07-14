@@ -61,7 +61,7 @@ def _playsoundOSX(sound, block = True):
     except ImportError:
         print("playsound could not find a copy of AppKit - falling back to using macOS's system copy.")
         import sys
-        if sys.version_info > 2:
+        if sys.version_info[0] > 2:
             from importlib.util import spec_from_file_location, module_from_spec
             spec = spec_from_file_location('objc._objc', '_objc.py')
             spec.loader.exec_module(module_from_spec(spec))
