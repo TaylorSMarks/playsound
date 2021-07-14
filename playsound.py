@@ -60,12 +60,16 @@ def _playsoundOSX(sound, block = True):
         from AppKit import NSSound
     except ImportError:
         print("playsound could not find a copy of AppKit - falling back to using macOS's system copy.")
-        import sys
-        if sys.version_info[0] > 2:
-            from importlib.util import spec_from_file_location, module_from_spec
-            module_from_spec(spec_from_file_location('objc._convenience', '_convenience.py'))
-            spec = spec_from_file_location('objc._objc', '_objc.so')
-            spec.loader.exec_module(module_from_spec(spec))
+        #import sys
+        #if sys.version_info[0] > 2:
+            # TODO:
+            #  This was fun, but lets just drop in the objc module here now...
+            #  If we can successfully run on a Mac on Python 3, we should move the folders so they don't show up on other platforms.
+            #from importlib.util import spec_from_file_location, module_from_spec
+            #module_from_spec(spec_from_file_location('objc._convenience', '_convenience.py'))
+            #spec = spec_from_file_location('objc._objc', '_objc.so')
+            #spec.loader.load_module()
+            #spec.loader.exec_module(module_from_spec(spec))
         sys.path.append('/System/Library/Frameworks/Python.framework/Versions/2.7/Extras/lib/python/PyObjC')
         from AppKit import NSSound
 
