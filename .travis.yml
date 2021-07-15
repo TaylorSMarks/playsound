@@ -15,7 +15,7 @@ jobs:
       dist: precise
       python: 2.7
       before_install:
-        - sudo apt-add-repository ppa:gstreamer-developers/ppa && sudo apt-get update && sudo apt-get install gstreamer1.0-tools gir1.2-gstreamer-1.0 gir1.2-gst-plugins-base-1.0 gstreamer1.0-plugins-good gstreamer1.0-plugins-ugly gstreamer1.0-plugins-bad gstreamer1.0-libav
+        - sudo apt-add-repository ppa:gstreamer-developers/ppa -y && sudo apt-get update && sudo apt-get install gstreamer1.0-tools gir1.2-gstreamer-1.0 gir1.2-gst-plugins-base-1.0 gstreamer1.0-plugins-good gstreamer1.0-plugins-ugly gstreamer1.0-plugins-bad gstreamer1.0-libav
     #- name: "Python 2.6 on Ubuntu 12 (Precise)"
     #  dist: precise
     #  python: 2.6

@@ -143,8 +143,10 @@ def _playsoundNix(sound, block = True):
     # FIXME: use some other bus method than poll() with block=False
     # https://lazka.github.io/pgi-docs/#Gst-1.0/classes/Bus.html
     bus = playbin.get_bus()
-    bus.poll(Gst.MessageType.EOS, Gst.CLOCK_TIME_NONE)
-    playbin.set_state(Gst.State.NULL)
+    try:
+        bus.poll(Gst.MessageType.EOS, Gst.CLOCK_TIME_NONE)
+    finally:
+        playbin.set_state(Gst.State.NULL)
 
 def _playsoundAnotherPython(otherPython, sound, block = True):
     '''
