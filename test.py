@@ -77,4 +77,7 @@ class PlaysoundTests(unittest.TestCase):
 
 if __name__ == '__main__':
     print(version)
+    import sys
+    print(sys.executable)
+    print(sys.path)
     unittest.main()
