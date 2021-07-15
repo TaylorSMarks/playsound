@@ -54,7 +54,7 @@ def _handlePathOSX(sound):
     try:
         # Don't double-encode it.
         sound.encode('ascii')
-        return sound
+        return sound.replace(' ', '%20')
     except UnicodeEncodeError:
         try:
             from urllib.parse import quote  # Try the Python 3 import first...
@@ -153,7 +153,7 @@ def _playsoundAnotherPython(otherPython, sound, block = True):
     '''
     from inspect    import getsourcefile
     from os.path    import abspath, exists
-    from subprocess import call
+    from subprocess import check_call
     from threading  import Thread
 
     class PropogatingThread(Thread):
