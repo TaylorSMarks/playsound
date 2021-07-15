@@ -158,6 +158,7 @@ def _playsoundAnotherPython(otherPython, sound, block = True):
 
     class PropogatingThread(Thread):
         def run(self):
+            self.exc = None
             try:
                 self.ret = self._target(*self._args, **self._kwargs)
             except BaseException as e:
