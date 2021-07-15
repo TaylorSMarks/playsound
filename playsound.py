@@ -45,19 +45,24 @@ def _playsoundWin(sound, block = True):
             pass
 
 def _handlePathOSX(sound):
-    try:
-        from urllib.parse import quote  # Try the Python 3 import first...
-    except ImportError:
-        from urllib import quote  # Try using the Python 2 import before giving up entirely...
-
     if '://' not in sound:
         if not sound.startswith('/'):
             from os import getcwd
             sound = getcwd() + '/' + sound
         sound = 'file://' + sound
 
-    parts = sound.split('://', 1)
-    return parts[0] + '://' + quote(parts[1].encode('utf-8')).replace(' ', '%20')
+    try:
+        # Don't double-encode it.
+        sound.encode('ascii')
+        return sound
+    except UnicodeEncodeError:
+        try:
+            from urllib.parse import quote  # Try the Python 3 import first...
+        except ImportError:
+            from urllib import quote  # Try using the Python 2 import before giving up entirely...
+
+        parts = sound.split('://', 1)
+        return parts[0] + '://' + quote(parts[1].encode('utf-8')).replace(' ', '%20')
 
 
 def _playsoundOSX(sound, block = True):
@@ -151,12 +156,25 @@ def _playsoundAnotherPython(otherPython, sound, block = True):
     from subprocess import call
     from threading  import Thread
 
+    class PropogatingThread(Thread):
+        def run(self):
+            try:
+                self.ret = self._target(*self._args, **self._kwargs)
+            except BaseException as e:
+                self.exc = e
+
+        def join(self, timeout = None):
+            super().join(timeout)
+            if self.exc:
+                raise self.exc
+            return self.ret
+
     # Check if the file exists...
     if not exists(abspath(sound)):
         raise PlaysoundException('Cannot find a sound with filename: ' + sound)
 
     playsoundPath = abspath(getsourcefile(lambda: 0))
-    t = Thread(target = lambda: call([otherPython, playsoundPath, _handlePathOSX(sound)]))
+    t = PropogatingThread(target = lambda: check_call([otherPython, playsoundPath, _handlePathOSX(sound)]))
     t.start()
     if block:
         t.join()
