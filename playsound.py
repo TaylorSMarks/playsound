@@ -167,6 +167,9 @@ def _playsoundAnotherPython(otherPython, sound, block = True):
     from subprocess import check_call
     from threading  import Thread
 
+    # Support passing in a pathlib.Path
+    sound = str(sound)
+
     class PropogatingThread(Thread):
         def run(self):
             self.exc = None
