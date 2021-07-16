@@ -1,6 +1,18 @@
 class PlaysoundException(Exception):
     pass
 
+def _canonicalizePath(path):
+    """
+    Support passing in a pathlib.Path-like object by converting to str.
+    """
+    import sys
+    if sys.version_info[0] >= 3:
+        return str(path)
+    else:
+        # On earlier Python versions, str is a byte string, so attempting to
+        # convert a unicode string to str will fail. Leave it alone in this case.
+        return path
+
 def _playsoundWin(sound, block = True):
     '''
     Utilizes windll.winmm. Tested and known to work with MP3 and WAVE on
@@ -16,8 +28,7 @@ def _playsoundWin(sound, block = True):
     from ctypes import c_buffer, windll
     from time   import sleep
 
-    # Support passing in a pathlib.Path
-    sound = str(sound)
+    sound = _canonicalizePath(sound)
 
     def winCommand(*command):
         bufLen = 600
@@ -48,8 +59,7 @@ def _playsoundWin(sound, block = True):
             pass
 
 def _handlePathOSX(sound):
-    # Support passing in a pathlib.Path
-    sound = str(sound)
+    sound = _canonicalizePath(sound)
 
     if '://' not in sound:
         if not sound.startswith('/'):
@@ -117,8 +127,7 @@ def _playsoundNix(sound, block = True):
     Inspired by this:
     https://gstreamer.freedesktop.org/documentation/tutorials/playback/playbin-usage.html
     """
-    # Support passing in a pathlib.Path
-    sound = str(sound)
+    sound = _canonicalizePath(sound)
 
     if not block:
         raise NotImplementedError(
@@ -167,8 +176,7 @@ def _playsoundAnotherPython(otherPython, sound, block = True):
     from subprocess import check_call
     from threading  import Thread
 
-    # Support passing in a pathlib.Path
-    sound = str(sound)
+    sound = _canonicalizePath(sound)
 
     class PropogatingThread(Thread):
         def run(self):
