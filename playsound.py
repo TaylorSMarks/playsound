@@ -16,6 +16,9 @@ def _playsoundWin(sound, block = True):
     from ctypes import c_buffer, windll
     from time   import sleep
 
+    # Support passing in a pathlib.Path
+    sound = str(sound)
+
     def winCommand(*command):
         bufLen = 600
         buf = c_buffer(bufLen)
@@ -45,6 +48,9 @@ def _playsoundWin(sound, block = True):
             pass
 
 def _handlePathOSX(sound):
+    # Support passing in a pathlib.Path
+    sound = str(sound)
+
     if '://' not in sound:
         if not sound.startswith('/'):
             from os import getcwd
@@ -111,6 +117,9 @@ def _playsoundNix(sound, block = True):
     Inspired by this:
     https://gstreamer.freedesktop.org/documentation/tutorials/playback/playbin-usage.html
     """
+    # Support passing in a pathlib.Path
+    sound = str(sound)
+
     if not block:
         raise NotImplementedError(
             "block=False cannot be used on this platform yet")
