@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 class PlaysoundException(Exception):
     pass
 
@@ -30,17 +33,18 @@ def _playsoundWin(sound, block = True):
             raise PlaysoundException(exceptionMessage)
         return buf.value
 
-    try:
-        winCommand(u'open "{}"'.format(sound))
-        durationInSeconds = winCommand(u'status "{}" length'.format(sound))
-        winCommand(u'play "{}"'.format(sound))
+    sound = u'"{}"'.format(sound)
 
-        if block:
-            sleep(float(durationInSeconds))
+    try:
+        logger.debug('Starting')
+        winCommand(u'open {}'.format(sound))
+        winCommand(u'play {}{}'.format(sound, ' wait' if block else ''))
+        logger.debug('Returning')
     finally:
         try:
-            winCommand(u'close "{}"'.format(sound))
+            winCommand(u'close {}'.format(sound))
         except PlaysoundException:
+            logger.warning(u'Failed to close the file: {}'.format(sound))
             # If it fails, there's nothing more that can be done...
             pass
 
@@ -80,7 +84,7 @@ def _playsoundOSX(sound, block = True):
     try:
         from AppKit import NSSound
     except ImportError:
-        print("playsound could not find a copy of AppKit - falling back to using macOS's system copy.")
+        logger.warning("playsound could not find a copy of AppKit - falling back to using macOS's system copy.")
         sys.path.append('/System/Library/Frameworks/Python.framework/Versions/2.7/Extras/lib/python/PyObjC')
         from AppKit import NSSound
 
@@ -97,7 +101,7 @@ def _playsoundOSX(sound, block = True):
         if nssound:
             break
         else:
-            print('Failed to load sound, although url was good... ' + sound)
+            logger.debug('Failed to load sound, although url was good... ' + sound)
     else:
         raise PlaysoundException('Could not load sound with filename, although URL was good... ' + sound)
     nssound.play()
@@ -135,6 +139,7 @@ def _playsoundNix(sound, block = True):
     else:
         playbin.props.uri = 'file://' + pathname2url(os.path.abspath(sound))
 
+
     set_result = playbin.set_state(Gst.State.PLAYING)
     if set_result != Gst.StateChangeReturn.ASYNC:
         raise PlaysoundException(
@@ -142,11 +147,13 @@ def _playsoundNix(sound, block = True):
 
     # FIXME: use some other bus method than poll() with block=False
     # https://lazka.github.io/pgi-docs/#Gst-1.0/classes/Bus.html
+    logger.debug('Starting play')
     bus = playbin.get_bus()
     try:
         bus.poll(Gst.MessageType.EOS, Gst.CLOCK_TIME_NONE)
     finally:
         playbin.set_state(Gst.State.NULL)
+    logger.debug('Finishing play')
 
 def _playsoundAnotherPython(otherPython, sound, block = True):
     '''
@@ -194,7 +201,7 @@ elif system == 'Darwin':
         try:
             from AppKit import NSSound
         except ImportError:
-            print("playsound is relying on a python 2 subprocess. Please use `pip3 install PyObjC` if you want playsound to run more efficiently.")
+            logger.warning("playsound is relying on a python 2 subprocess. Please use `pip3 install PyObjC` if you want playsound to run more efficiently.")
             playsound = lambda sound, block = True: _playsoundAnotherPython('/System/Library/Frameworks/Python.framework/Versions/2.7/bin/python', sound, block)
 else:
     playsound = _playsoundNix

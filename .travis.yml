@@ -11,22 +11,17 @@ jobs:
       python: 3.6
       before_install:
         - sudo apt-get install gstreamer1.0-tools gir1.2-gstreamer-1.0 gir1.2-gst-plugins-base-1.0 gstreamer1.0-plugins-good gstreamer1.0-plugins-ugly gstreamer1.0-plugins-bad gstreamer1.0-libav
-    - name: "Python 2.7 on Ubuntu 12 (Precise)"
-      dist: precise
+    - name: "Python 2.7 on Ubuntu 14 (Trusty)"
+      dist: trusty
       python: 2.7
       before_install:
-        - sudo apt-add-repository ppa:gstreamer-developers/ppa -y && sudo apt-get update && sudo apt-get install gstreamer1.0-tools gir1.2-gstreamer-1.0 gir1.2-gst-plugins-base-1.0 gstreamer1.0-plugins-good gstreamer1.0-plugins-ugly gstreamer1.0-plugins-bad gstreamer1.0-libav
-    #- name: "Python 2.6 on Ubuntu 12 (Precise)"
-    #  dist: precise
-    #  python: 2.6
-    #  before_install:
-    #    - sudo apt-get install gstreamer1.0-tools gir1.2-gstreamer-1.0 gir1.2-gst-plugins-base-1.0 gstreamer1.0-plugins-good gstreamer1.0-plugins-ugly gstreamer1.0-plugins-bad gstreamer1.0-libav
-    - name: "Python 3.9 on macOS 11.3 (Big Sur)"
+        - sudo apt-get install gstreamer1.0-tools gir1.2-gstreamer-1.0 gir1.2-gst-plugins-base-1.0 gstreamer1.0-plugins-good gstreamer1.0-plugins-ugly gstreamer1.0-plugins-bad gstreamer1.0-libav
+    - name: "Python 3.9 on macOS 11.3 (Big Sur, 2020)"
       os: osx
       osx_image: xcode12.5
       language: shell
       script: python3 test.py
-    - name: "Python 2.7 on macOS 10.11 (El Capitan)"
+    - name: "Python 2.7 on macOS 10.11 (El Capitan, 2015)"
       os: osx
       osx_image: xcode7.3
       language: shell
@@ -46,4 +41,4 @@ install: true  # Makes it do nothing instead of trying to find a requirements.tx
 script:
   - python test.py
 virtualenv:
-  system_site_packages: true  # I think we need this for python to be able to access gi on Linux.
+  system_site_packages: true  # Needed for python to be able to access gi on Linux.

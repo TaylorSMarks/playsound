@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-=
 
-# On Mac, ignoring the issue of not having AppKit if it's not the stock version of Python, it's working for all but Cyrllic...
-# Just need to find out how to properly escape the name so that it works...
-
 from os       import environ, listdir
 from os.path  import join
 from platform import system
 from sys      import version
 from time     import time
+
+import logging
+
+logging.basicConfig(format = '%(asctime)s %(message)s', level = logging.DEBUG)
 
 system = system()
 isTravis = environ.get('TRAVIS', 'false') == 'true'
@@ -32,15 +33,15 @@ if isTravis and system == 'Windows':
 from playsound import playsound, PlaysoundException
 import unittest
 
-durationMarginLow  = 0.3
+durationMarginLow  = 0.2
 duratingMarginHigh = 2.0
-sawClose = False
 
 def mockMciSendStringW(command, buf, bufLen, bufStart):
     if command.startswith('close '.encode('utf-16')):
         global sawClose
         sawClose = True
-    buf.value = b'2.1' # This is what it'll get for the duration in seconds for the file - it's close enough for all 4 of the test files.
+    if command.endswith(' wait'.encode('utf-16')):
+        sleep(expectedDuration)
     return 0
 
 class PlaysoundTests(unittest.TestCase):
@@ -51,14 +52,15 @@ class PlaysoundTests(unittest.TestCase):
 
         if isTravis and system == 'Windows':
             with patch('ctypes.windll.winmm.mciSendStringW', side_effect = mockMciSendStringW):
-                global sawClose
+                global expectedDuration, sawClose
                 sawClose = False
+                expectedDuration = approximateDuration
                 playsound(path, block = block)
                 self.assertTrue(sawClose)
         else:
             playsound(path, block = block)
         duration = time() - startTime
-        self.assertTrue(approximateDuration - durationMarginLow <= duration <= approximateDuration + duratingMarginHigh, 'File "{}" took an unexpected amount of time: {}'.format(file.encode('utf-8'), duration))
+        self.assertTrue(approximateDuration - durationMarginLow <= duration <= approximateDuration + duratingMarginHigh, 'File "{}" took an unexpected amount of time: {:.2f} - expected ~{:.2f}'.format(file.encode('utf-8'), duration, approximateDuration))
 
     testBlockingASCII_MP3 = lambda self: self.helper('Damonte.mp3', 1.1)
     testBlockingASCII_WAV = lambda self: self.helper('Sound4.wav',  1.3)
@@ -70,10 +72,10 @@ class PlaysoundTests(unittest.TestCase):
         with self.assertRaises(PlaysoundException) as context:
             playsound('notarealfile.wav')
 
-            message = context.exception.message.lower()
-
-            for sub in ['cannot', 'find', 'filename', 'notarealfile.wav']:
-                self.assertIn(sub, message.lower(), '"{}" was expected in the exception message, but instead got: "{}"'.format(sub, message))
+        message = str(context.exception).lower()
+            
+        for sub in ['cannot', 'find', 'filename', 'notarealfile.wav']:
+            self.assertIn(sub, message, '"{}" was expected in the exception message, but instead got: "{}"'.format(sub, message))
 
 if __name__ == '__main__':
     print(version)
