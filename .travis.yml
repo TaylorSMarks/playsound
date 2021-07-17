@@ -10,33 +10,36 @@ jobs:
       dist: bionic
       python: 3.6
       before_install:
+        - which ffplay
         - sudo apt-get install gstreamer1.0-tools gir1.2-gstreamer-1.0 gir1.2-gst-plugins-base-1.0 gstreamer1.0-plugins-good gstreamer1.0-plugins-ugly gstreamer1.0-plugins-bad gstreamer1.0-libav
-    - name: "Python 2.7 on Ubuntu 14 (Trusty)"
-      dist: trusty
-      python: 2.7
-      before_install:
-        - sudo apt-get install gstreamer1.0-tools gir1.2-gstreamer-1.0 gir1.2-gst-plugins-base-1.0 gstreamer1.0-plugins-good gstreamer1.0-plugins-ugly gstreamer1.0-plugins-bad gstreamer1.0-libav
-    - name: "Python 3.9 on macOS 11.3 (Big Sur, 2020)"
-      os: osx
-      osx_image: xcode12.5
-      language: shell
-      script: python3 test.py
-    - name: "Python 2.7 on macOS 10.11 (El Capitan, 2015)"
-      os: osx
-      osx_image: xcode7.3
-      language: shell
+        - which ffplay
+    #- name: "Python 2.7 on Ubuntu 14 (Trusty)"
+    #  dist: trusty
+    #  python: 2.7
+    #  before_install:
+    #    - sudo apt-get install gstreamer1.0-tools gir1.2-gstreamer-1.0 gir1.2-gst-plugins-base-1.0 gstreamer1.0-plugins-good gstreamer1.0-plugins-ugly gstreamer1.0-plugins-bad gstreamer1.0-libav
+    #- name: "Python 3.9 on macOS 11.3 (Big Sur, 2020)"
+    #  os: osx
+    #  osx_image: xcode12.5
+    #  language: shell
+    #  script: python3 test.py
+    #- name: "Python 2.7 on macOS 10.11 (El Capitan, 2015)"
+    #  os: osx
+    #  osx_image: xcode7.3
+    #  language: shell
     - name: "Python 2.7 on Windows"
       os: windows
       language: shell
       before_install:
+        - Powershell.exe -Command "Get-WindowsFeature"
         - choco install python --version 2.7.11
       env: PATH=/c/Python27:/c/Python27/Scripts:/c/tools/python:/c/tools/python/Scripts:$PATH
-    - name: "Python 3.9 on Windows"
-      os: windows
-      language: shell
-      before_install:
-        - choco install python --version 3.9.5
-      env: PATH=/c/Python39:/c/Python39/Scripts:$PATH
+    #- name: "Python 3.9 on Windows"
+    #  os: windows
+    #  language: shell
+    #  before_install:
+    #    - choco install python --version 3.9.5
+    #  env: PATH=/c/Python39:/c/Python39/Scripts:$PATH
 install: true  # Makes it do nothing instead of trying to find a requirements.txt file.
 script:
   - python test.py
