@@ -41,8 +41,7 @@ jobs:
       os: windows
       language: shell
       before_install:
-        - Powershell.exe -Command "Get-WindowsOptionalFeature -Online -FeatureName *Media*"
-        #- Powershell.exe -Command "Install-WindowsFeature Server-Media-Foundation"
+        - Powershell.exe -Command "Install-WindowsFeature Server-Media-Foundation -Restart"
         - choco install python --version 2.7.11
       env: PATH=/c/Python27:/c/Python27/Scripts:/c/tools/python:/c/tools/python/Scripts:$PATH
     #- name: "Python 3.9 on Windows"
