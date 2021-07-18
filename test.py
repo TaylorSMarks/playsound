@@ -4,16 +4,17 @@ from os       import environ, listdir
 from os.path  import join
 from platform import system
 from sys      import version
-from time     import time
+from time     import sleep, time
 
 import logging
 
 logging.basicConfig(format = '%(asctime)s %(message)s', level = logging.DEBUG)
 
 system = system()
-isTravis = environ.get('TRAVIS', 'false') == 'true'
+isTravis = False #environ.get('TRAVIS', 'false') == 'true'
 
 if isTravis and system == 'Windows':
+    print('\n>>> Will be mocking instead of using the real MciSendStringW function for most tests.\n')
     try:
         from unittest.mock import patch
     except ImportError:
@@ -35,12 +36,14 @@ import unittest
 
 durationMarginLow  = 0.2
 duratingMarginHigh = 2.0
+expectedDuration   = None
 
 def mockMciSendStringW(command, buf, bufLen, bufStart):
-    if command.startswith('close '.encode('utf-16')):
+    command = command.decode('utf-16')
+    if command.startswith(u'close '):
         global sawClose
         sawClose = True
-    if command.endswith(' wait'.encode('utf-16')):
+    if command.endswith(u' wait'):
         sleep(expectedDuration)
     return 0
 
