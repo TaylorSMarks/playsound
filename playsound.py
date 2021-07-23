@@ -22,7 +22,7 @@ def _playsoundWin(sound, block = True):
         from shutil   import copy
         from tempfile import mkstemp
         
-        fd, tempPath = mkstemp(prefix = 'playsound_', suffix = splitext(sound)[1])
+        fd, tempPath = mkstemp(prefix = 'PS', suffix = splitext(sound)[1])  # Avoid generating files longer than 8.3 characters.
         logger.info('Made a temporary copy of {} at {} - use other filenames with only safe characters to avoid this.'.format(sound, tempPath))
         copy(sound, tempPath)
         close(fd)  # mkstemp opens the file, but it must be closed before MCI can open it.
