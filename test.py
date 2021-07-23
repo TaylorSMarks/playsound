@@ -15,6 +15,8 @@ isTravis = environ.get('TRAVIS', 'false') == 'true'
 
 if isTravis and system == 'Windows':
     print('\n>>> Will be mocking instead of using the real MciSendStringW function for most tests.\n')
+    from ctypes import windll
+    originalMCISendStringW = windll.winmm.mciSendStringW
     try:
         from unittest.mock import patch
     except ImportError:
@@ -30,7 +32,6 @@ if isTravis and system == 'Windows':
         # the library available on pypi.
         pipmain(['install', 'mock==2.0.0'])
         from mock   import patch
-        from ctypes import windll
 
 from playsound import playsound, PlaysoundException
 import unittest
@@ -44,18 +45,18 @@ def mockMciSendStringW(command, buf, bufLen, bufStart):
     decodeCommand = command.decode('utf-16')
 
     if decodeCommand.startswith(u'open '):
-        testCase.assertEqual(windll.winmm.mciSendStringW(command, buf, bufLen, bufStart), 306)  # 306 indicates drivers are missing. It's fine.
+        testCase.assertIn(originalMCISendStringW(command, buf, bufLen, bufStart), [0, 306])  # 306 indicates drivers are missing. It's fine.
         return 0
     
     if decodeCommand.endswith(u' wait'):
-        testCase.assertEqual(windll.winmm.mciSendStringW(command, buf, bufLen, bufStart), 0)
+        testCase.assertEqual(originalMCISendStringW(command, buf, bufLen, bufStart), 0)
         sleep(expectedDuration)
         return 0
 
     if decodeCommand.startswith(u'close '):
         global sawClose
         sawClose = True
-        testCase.assertEqual(windll.winmm.mciSendStringW(command, buf, bufLen, bufStart), 0)
+        testCase.assertEqual(originalMCISendStringW(command, buf, bufLen, bufStart), 0)
         return 0
 
 class PlaysoundTests(unittest.TestCase):
