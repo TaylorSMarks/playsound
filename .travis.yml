@@ -14,20 +14,20 @@ jobs:
       python: 3.9
       before_install:
         - sudo apt-get install gstreamer1.0-tools gir1.2-gstreamer-1.0 gir1.2-gst-plugins-base-1.0 gstreamer1.0-plugins-good gstreamer1.0-plugins-ugly gstreamer1.0-plugins-bad gstreamer1.0-libav
-    #- name: "Python 3.6 on Ubuntu 18 (Bionic)"
-    #  dist: bionic
-    #  python: 3.6
-    #  before_install:
-    #     - sudo apt-get install gstreamer1.0-tools gir1.2-gstreamer-1.0 gir1.2-gst-plugins-base-1.0 gstreamer1.0-plugins-good gstreamer1.0-plugins-ugly gstreamer1.0-plugins-bad gstreamer1.0-libav
-    #  virtualenv:
-    #    system_site_packages: true  # Needed for python to be able to access gi on Linux.
-    #- name: "Python 2.7 on Ubuntu 14 (Trusty)"
-    #  dist: trusty
-    #  python: 2.7
-    #  before_install:
-    #    - sudo apt-get install python-gi gstreamer1.0-tools gir1.2-gstreamer-1.0 gir1.2-gst-plugins-base-1.0 gstreamer1.0-plugins-good gstreamer1.0-plugins-ugly gstreamer1.0-plugins-bad gstreamer1.0-libav
-    #  virtualenv:
-    #    system_site_packages: true  # Needed for python to be able to access gi on Linux.
+    - name: "Python 3.6 on Ubuntu 18 (Bionic)"
+      dist: bionic
+      python: 3.6
+      before_install:
+         - sudo apt-get install gstreamer1.0-tools gir1.2-gstreamer-1.0 gir1.2-gst-plugins-base-1.0 gstreamer1.0-plugins-good gstreamer1.0-plugins-ugly gstreamer1.0-plugins-bad gstreamer1.0-libav
+      virtualenv:
+        system_site_packages: true  # Needed for python to be able to access gi on Linux.
+    - name: "Python 2.7 on Ubuntu 14 (Trusty)"
+      dist: trusty
+      python: 2.7
+      before_install:
+        - sudo apt-get install python-gi gstreamer1.0-tools gir1.2-gstreamer-1.0 gir1.2-gst-plugins-base-1.0 gstreamer1.0-plugins-good gstreamer1.0-plugins-ugly gstreamer1.0-plugins-bad gstreamer1.0-libav
+      virtualenv:
+        system_site_packages: true  # Needed for python to be able to access gi on Linux.
     
     # >>> Each macOS Run costs ~250 Build Credits - running both macOSs costs ~500 Build Credits. Read NOTE at top.
     
@@ -36,25 +36,25 @@ jobs:
       osx_image: xcode12.5
       language: shell
       script: python3 test.py
-    #- name: "Python 2.7 on macOS 10.11 (El Capitan, 2015)"
-    #  os: osx
-    #  osx_image: xcode7.3
-    #  language: shell
+    - name: "Python 2.7 on macOS 10.11 (El Capitan, 2015)"
+      os: osx
+      osx_image: xcode7.3
+      language: shell
 
     # >>> Each Windows run costs ~100 Build Credits - running both Windows costs ~200 Build Credits. Read NOTE at top.
 
-    #- name: "Python 2.7 on Windows"
-    #  os: windows
-    #  language: shell
-    #  before_install:
-    #    - choco install python --version 2.7.11
-    #  env: PATH=/c/Python27:/c/Python27/Scripts:/c/tools/python:/c/tools/python/Scripts:$PATH
-    #- name: "Python 3.9 on Windows"
-    #  os: windows
-    #  language: shell
-    #  before_install:
-    #    - choco install python --version 3.9.5
-    #  env: PATH=/c/Python39:/c/Python39/Scripts:$PATH
+    - name: "Python 2.7 on Windows"
+      os: windows
+      language: shell
+      before_install:
+        - choco install python --version 2.7.11
+      env: PATH=/c/Python27:/c/Python27/Scripts:/c/tools/python:/c/tools/python/Scripts:$PATH
+    - name: "Python 3.9 on Windows"
+      os: windows
+      language: shell
+      before_install:
+        - choco install python --version 3.9.5
+      env: PATH=/c/Python39:/c/Python39/Scripts:$PATH
 install: true  # Makes it do nothing instead of trying to find a requirements.txt file.
 script:
   - python test.py

@@ -39,16 +39,18 @@ On Windows, uses windll.winmm. WAVE and MP3 have been tested and are known to wo
 
 On OS X, uses AppKit.NSSound. WAVE and MP3 have been tested and are known to work. In general, anything QuickTime can play, playsound should be able to play, for OS X.
 
-On Linux, uses GStreamer. Known to work on Ubuntu 14.04 and ElementaryOS Loki.
+On Linux, uses GStreamer. Known to work on Ubuntu 14.04 and ElementaryOS Loki. I expect any Linux distro with a standard gnome desktop experience should work.
 
-Requirements
-------------
-I've only tested playsound it with Python 2.7 on Windows 7 and OS X 10.11, but
-I expect that it should work on Windows XP thru 10 at least, OS X 10.5 and newer,
-all versions of Linux, and Python 2.3 and newer.
+If you'd like other Linux distros (or any other OS) to work, submit a PR adding in support for it, but please make sure it passes the tests (see below).
+
+Testing
+-------
+Playsound includes a small set of tests - if you're making a PR, please ensure that you have no regressions and all the tests pass on your local system.
+Also make sure that Travis-CI, which runs these tests against Windows Server 2016, macOS 10.11 (El Capitan, 2015) and 11.3 (Big Sur, 2020), Ubuntu 14 (Trusty), and Ubuntu 18 (Bionic), for both Python 2.7 and 3.9, fully passes.
+You can check the Travis-CI status for Playsound here: https://travis-ci.com/github/TaylorSMarks/playsound/builds
 
 Copyright
 ---------
-This software is Copyright (c) 2016 Taylor Marks <taylor@marksfam.com>.
+This software is Copyright (c) 2021 Taylor Marks <taylor@marksfam.com>.
 
 See the bundled LICENSE file for more information.

@@ -1,3 +1,9 @@
+1.3.0 (July 23, 2021)
+
+    * Adds in an automated test suite.
+    * Non-ascii filepaths and filepaths with spaces should now consistently work.
+    * Path objects are supported now.
+
 1.2.1 (Feb. 27, 2016)
 
     * Fixes bug that prevented relative paths from working on OS X.

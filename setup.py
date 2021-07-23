@@ -9,7 +9,7 @@ with open(join(here, 'README.rst'), encoding='utf-8') as f:
     long_description = f.read()
 
 setup(name             = 'playsound',
-      version          = '1.2.1',
+      version          = '1.3.0',
       description      = long_description.splitlines()[2][1:-1],
       long_description = long_description,
       url              = 'https://github.com/TaylorSMarks/playsound',
@@ -32,6 +32,9 @@ setup(name             = 'playsound',
                           'Programming Language :: Python :: 3.3',
                           'Programming Language :: Python :: 3.4',
                           'Programming Language :: Python :: 3.5',
+                          'Programming Language :: Python :: 3.6',
+                          'Programming Language :: Python :: 3.7',
+                          'Programming Language :: Python :: 3.8',
                           'Programming Language :: Python :: 3.9',
                           'Topic :: Multimedia :: Sound/Audio :: MIDI',
                           'Topic :: Multimedia :: Sound/Audio :: Players',
