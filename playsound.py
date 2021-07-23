@@ -174,7 +174,7 @@ def _playsoundNix(sound, block = True):
             
     logger.debug('Finishing play')
 
-def _playsoundAnotherPython(otherPython, sound, block = True):
+def _playsoundAnotherPython(otherPython, sound, block = True, macOS = False):
     '''
     Mostly written so that when this is run on python3 on macOS, it can invoke
     python2 on macOS... but maybe this idea could be useful on linux, too.
@@ -203,7 +203,7 @@ def _playsoundAnotherPython(otherPython, sound, block = True):
         raise PlaysoundException('Cannot find a sound with filename: ' + sound)
 
     playsoundPath = abspath(getsourcefile(lambda: 0))
-    t = PropogatingThread(target = lambda: check_call([otherPython, playsoundPath, _handlePathOSX(sound)]))
+    t = PropogatingThread(target = lambda: check_call([otherPython, playsoundPath, _handlePathOSX(sound) if macOS else sound]))
     t.start()
     if block:
         t.join()
@@ -221,7 +221,7 @@ elif system == 'Darwin':
             from AppKit import NSSound
         except ImportError:
             logger.warning("playsound is relying on a python 2 subprocess. Please use `pip3 install PyObjC` if you want playsound to run more efficiently.")
-            playsound = lambda sound, block = True: _playsoundAnotherPython('/System/Library/Frameworks/Python.framework/Versions/2.7/bin/python', sound, block)
+            playsound = lambda sound, block = True: _playsoundAnotherPython('/System/Library/Frameworks/Python.framework/Versions/2.7/bin/python', sound, block, macOS = True)
 else:
     playsound = _playsoundNix
     if __name__ != '__main__':  # Ensure we don't infinitely recurse trying to get another python instance.
@@ -231,7 +231,7 @@ else:
             from gi.repository import Gst
         except:
             logger.warning("playsound is relying on another python subprocess. Please use `pip install pygobject` if you want playsound to run more efficiently.")
-            playsound = lambda sound, block = True: _playsoundAnotherPython('/usr/bin/python3', sound, block)
+            playsound = lambda sound, block = True: _playsoundAnotherPython('/usr/bin/python3', sound, block, macOS = False)
 
 del system
 

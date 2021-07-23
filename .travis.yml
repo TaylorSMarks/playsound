@@ -14,13 +14,13 @@ jobs:
       python: 3.9
       before_install:
         - sudo apt-get install gstreamer1.0-tools gir1.2-gstreamer-1.0 gir1.2-gst-plugins-base-1.0 gstreamer1.0-plugins-good gstreamer1.0-plugins-ugly gstreamer1.0-plugins-bad gstreamer1.0-libav
-    - name: "Python 3.6 on Ubuntu 18 (Bionic)"
-      dist: bionic
-      python: 3.6
-      before_install:
-         - sudo apt-get install gstreamer1.0-tools gir1.2-gstreamer-1.0 gir1.2-gst-plugins-base-1.0 gstreamer1.0-plugins-good gstreamer1.0-plugins-ugly gstreamer1.0-plugins-bad gstreamer1.0-libav
-      virtualenv:
-        system_site_packages: true  # Needed for python to be able to access gi on Linux.
+    #- name: "Python 3.6 on Ubuntu 18 (Bionic)"
+    #  dist: bionic
+    #  python: 3.6
+    #  before_install:
+    #     - sudo apt-get install gstreamer1.0-tools gir1.2-gstreamer-1.0 gir1.2-gst-plugins-base-1.0 gstreamer1.0-plugins-good gstreamer1.0-plugins-ugly gstreamer1.0-plugins-bad gstreamer1.0-libav
+    #  virtualenv:
+    #    system_site_packages: true  # Needed for python to be able to access gi on Linux.
     #- name: "Python 2.7 on Ubuntu 14 (Trusty)"
     #  dist: trusty
     #  python: 2.7
@@ -31,11 +31,11 @@ jobs:
     
     # >>> Each macOS Run costs ~250 Build Credits - running both macOSs costs ~500 Build Credits. Read NOTE at top.
     
-    #- name: "Python 3.9 on macOS 11.3 (Big Sur, 2020)"
-    #  os: osx
-    #  osx_image: xcode12.5
-    #  language: shell
-    #  script: python3 test.py
+    - name: "Python 3.9 on macOS 11.3 (Big Sur, 2020)"
+      os: osx
+      osx_image: xcode12.5
+      language: shell
+      script: python3 test.py
     #- name: "Python 2.7 on macOS 10.11 (El Capitan, 2015)"
     #  os: osx
     #  osx_image: xcode7.3
