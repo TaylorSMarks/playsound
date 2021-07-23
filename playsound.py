@@ -224,13 +224,14 @@ elif system == 'Darwin':
             playsound = lambda sound, block = True: _playsoundAnotherPython('/System/Library/Frameworks/Python.framework/Versions/2.7/bin/python', sound, block)
 else:
     playsound = _playsoundNix
-    try:
-        import gi
-        gi.require_version('Gst', '1.0')
-        from gi.repository import Gst
-    except:
-        logger.warning("playsound is relying on another python subprocess. Please use `pip install pygobject` if you want playsound to run more efficiently.")
-        playsound = lambda sound, block = True: _playsoundAnotherPython('/usr/bin/python', sound, block)
+    if __name__ != '__main__':  # Ensure we don't infinitely recurse trying to get another python instance.
+        try:
+            import gi
+            gi.require_version('Gst', '1.0')
+            from gi.repository import Gst
+        except:
+            logger.warning("playsound is relying on another python subprocess. Please use `pip install pygobject` if you want playsound to run more efficiently.")
+            playsound = lambda sound, block = True: _playsoundAnotherPython('/usr/bin/python3', sound, block)
 
 del system
 
