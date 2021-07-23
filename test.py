@@ -60,10 +60,14 @@ def mockMciSendStringW(command, buf, bufLen, bufStart):
         return 0
 
 class PlaysoundTests(unittest.TestCase):
-    def helper(self, file, approximateDuration, block = True):
-        startTime = time()
+    def get_full_path(self, file):
         path = join('test_media', file)
         print(path.encode('utf-8'))
+        return path
+
+    def helper(self, file, approximateDuration, block = True):
+        startTime = time()
+        path = self.get_full_path(file)
 
         if isTravis and system == 'Windows':
             with patch('ctypes.windll.winmm.mciSendStringW', side_effect = mockMciSendStringW):
@@ -86,12 +90,22 @@ class PlaysoundTests(unittest.TestCase):
 
     def testMissing(self):
         with self.assertRaises(PlaysoundException) as context:
-            playsound('fakefile.wav')
+            playsound(self.get_full_path('fakefile.wav'))
 
         message = str(context.exception).lower()
             
         for sub in ['not', 'fakefile.wav']:
             self.assertIn(sub, message, '"{}" was expected in the exception message, but instead got: "{}"'.format(sub, message))
+
+# Run the same tests as above, but pass pathlib.Path objects to playsound instead of strings.
+try:
+    from pathlib import Path
+except ImportError:
+    pass
+else:
+    class PlaysoundTestsWithPathlib(PlaysoundTests):
+        def get_full_path(self, file):
+            return Path('test_media') / file
 
 if __name__ == '__main__':
     print(version)
