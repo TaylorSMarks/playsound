@@ -39,8 +39,7 @@ On Windows, uses windll.winmm. WAVE and MP3 have been tested and are known to wo
 
 On OS X, uses AppKit.NSSound. WAVE and MP3 have been tested and are known to work. In general, anything QuickTime can play, playsound should be able to play, for OS X.
 
-On Linux, uses GStreamer. Known to work on Ubuntu 14.04 and ElementaryOS
-Loki. Support for the ``block`` argument is currently not implemented.
+On Linux, uses GStreamer. Known to work on Ubuntu 14.04 and ElementaryOS Loki.
 
 Requirements
 ------------
