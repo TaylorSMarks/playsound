@@ -1,18 +1,22 @@
 # -*- coding: utf-8 -*-=
 
-# On Mac, ignoring the issue of not having AppKit if it's not the stock version of Python, it's working for all but Cyrllic...
-# Just need to find out how to properly escape the name so that it works...
-
 from os       import environ, listdir
 from os.path  import join
 from platform import system
 from sys      import version
-from time     import time
+from time     import sleep, time
+
+import logging
+
+logging.basicConfig(format = '%(asctime)s %(message)s', level = logging.DEBUG)
 
 system = system()
 isTravis = environ.get('TRAVIS', 'false') == 'true'
 
 if isTravis and system == 'Windows':
+    print('\n>>> Will be mocking instead of using the real MciSendStringW function for most tests.\n')
+    from ctypes import windll
+    originalMCISendStringW = windll.winmm.mciSendStringW
     try:
         from unittest.mock import patch
     except ImportError:
@@ -27,21 +31,33 @@ if isTravis and system == 'Windows':
         # versions require python 3.3, utterly defeating the purpose of making
         # the library available on pypi.
         pipmain(['install', 'mock==2.0.0'])
-        from mock import patch
+        from mock   import patch
 
 from playsound import playsound, PlaysoundException
 import unittest
 
-durationMarginLow  = 0.3
-duratingMarginHigh = 1.6
-sawClose = False
+durationMarginLow  = 0.2
+duratingMarginHigh = 2.0
+expectedDuration   = None
+testCase           = None
 
 def mockMciSendStringW(command, buf, bufLen, bufStart):
-    if command.startswith('close '.encode('utf-16')):
+    decodeCommand = command.decode('utf-16')
+
+    # Error code 305 ("Cannot specify extra characters after a string enclosed in quotation marks.") should never be tolerated.
+    
+    if decodeCommand.startswith(u'close '):
         global sawClose
         sawClose = True
-    buf.value = b'2.1' # This is what it'll get for the duration in seconds for the file - it's close enough for all 4 of the test files.
-    return 0
+        testCase.assertIn(originalMCISendStringW(command, buf, bufLen, bufStart), [0, 263])  # 263 indicates it's not opened or not recognized. It's fine.
+        return 0
+
+    if decodeCommand.endswith(u' wait'):
+        sleep(expectedDuration)
+
+    if decodeCommand.startswith(u'open ') or decodeCommand.startswith(u'play '):
+        testCase.assertIn(originalMCISendStringW(command, buf, bufLen, bufStart), [0, 306])  # 306 indicates drivers are missing. It's fine.
+        return 0
 
 class PlaysoundTests(unittest.TestCase):
     def helper(self, file, approximateDuration, block = True):
@@ -51,14 +67,16 @@ class PlaysoundTests(unittest.TestCase):
 
         if isTravis and system == 'Windows':
             with patch('ctypes.windll.winmm.mciSendStringW', side_effect = mockMciSendStringW):
-                global sawClose
+                global expectedDuration, sawClose, testCase
+                testCase = self
                 sawClose = False
+                expectedDuration = approximateDuration
                 playsound(path, block = block)
                 self.assertTrue(sawClose)
         else:
             playsound(path, block = block)
         duration = time() - startTime
-        self.assertTrue(approximateDuration - durationMarginLow <= duration <= approximateDuration + duratingMarginHigh, 'File "{}" took an unexpected amount of time: {}'.format(file.encode('utf-8'), duration))
+        self.assertTrue(approximateDuration - durationMarginLow <= duration <= approximateDuration + duratingMarginHigh, 'File "{}" took an unexpected amount of time: {:.2f} - expected ~{:.2f}'.format(file.encode('utf-8'), duration, approximateDuration))
 
     testBlockingASCII_MP3 = lambda self: self.helper('Damonte.mp3', 1.1)
     testBlockingASCII_WAV = lambda self: self.helper('Sound4.wav',  1.3)
@@ -68,13 +86,16 @@ class PlaysoundTests(unittest.TestCase):
 
     def testMissing(self):
         with self.assertRaises(PlaysoundException) as context:
-            playsound('notarealfile.wav')
+            playsound('fakefile.wav')
 
-            message = context.exception.message.lower()
-
-            for sub in ['cannot', 'find', 'filename', 'notarealfile.wav']:
-                self.assertIn(sub, message.lower(), '"{}" was expected in the exception message, but instead got: "{}"'.format(sub, message))
+        message = str(context.exception).lower()
+            
+        for sub in ['not', 'fakefile.wav']:
+            self.assertIn(sub, message, '"{}" was expected in the exception message, but instead got: "{}"'.format(sub, message))
 
 if __name__ == '__main__':
     print(version)
+    import sys
+    print(sys.executable)
+    print(sys.path)
     unittest.main()
