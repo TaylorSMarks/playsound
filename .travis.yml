@@ -7,24 +7,26 @@ jobs:
     # >>> Enable all the platforms before making a PR, to ensure no regressions were accidentally introduced by your changes.
 
     # >>> Each Ubuntu Run costs ~50 Build Credits, running all 3 Ubuntus costs ~150 Build Credits. Read NOTE at top.
+    #     A typical Ubuntu desktop install would have gstreamer preinstalled, so it's okay to pull that in for our tests on a Ubuntu server.
 
-    #- name: "Python 3.9 on Ubuntu 18 (Bionic)"
-    #  dist: bionic
-    #  python: 3.9
-    #  before_install:
-    #    - sudo apt-get install gstreamer1.0-tools gir1.2-gstreamer-1.0 gir1.2-gst-plugins-base-1.0 gstreamer1.0-plugins-good gstreamer1.0-plugins-ugly gstreamer1.0-plugins-bad gstreamer1.0-libav
+    - name: "Python 3.9 on Ubuntu 18 (Bionic)"
+      dist: bionic
+      python: 3.9
+      before_install:
+        - sudo apt-get install gstreamer1.0-tools gir1.2-gstreamer-1.0 gir1.2-gst-plugins-base-1.0 gstreamer1.0-plugins-good gstreamer1.0-plugins-ugly gstreamer1.0-plugins-bad gstreamer1.0-libav
 
-    # A typical Ubuntu desktop install would have gstreamer preinstalled, so it's okay to pull that in for our tests on a Ubuntu server.
+
     - name: "Python 3.6 on Ubuntu 18 (Bionic)"
       dist: bionic
       python: 3.6
       before_install:
          - sudo apt-get install gstreamer1.0-tools gir1.2-gstreamer-1.0 gir1.2-gst-plugins-base-1.0 gstreamer1.0-plugins-good gstreamer1.0-plugins-ugly gstreamer1.0-plugins-bad gstreamer1.0-libav
-    #- name: "Python 2.7 on Ubuntu 14 (Trusty)"
-    #  dist: trusty
-    #  python: 2.7
-    #  before_install:
-    #    - sudo apt-get install gstreamer1.0-tools gir1.2-gstreamer-1.0 gir1.2-gst-plugins-base-1.0 gstreamer1.0-plugins-good gstreamer1.0-plugins-ugly gstreamer1.0-plugins-bad gstreamer1.0-libav
+    - name: "Python 2.7 on Ubuntu 14 (Trusty)"
+      dist: trusty
+      python: 2.7
+      before_install:
+        - sudo apt-get install gstreamer1.0-tools gir1.2-gstreamer-1.0 gir1.2-gst-plugins-base-1.0 gstreamer1.0-plugins-good gstreamer1.0-plugins-ugly gstreamer1.0-plugins-bad gstreamer1.0-libav
+    
     # >>> Each macOS Run costs ~250 Build Credits - running both macOSs costs ~500 Build Credits. Read NOTE at top.
     
     #- name: "Python 3.9 on macOS 11.3 (Big Sur, 2020)"

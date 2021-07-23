@@ -138,7 +138,7 @@ def _playsoundNix(sound, block = True):
             "block=False cannot be used on this platform yet")
 
     # pathname2url escapes non-URL-safe characters
-    import os
+    from os.path import abspath, exists
     try:
         from urllib.request import pathname2url
     except ImportError:
@@ -155,7 +155,10 @@ def _playsoundNix(sound, block = True):
     if sound.startswith(('http://', 'https://')):
         playbin.props.uri = sound
     else:
-        playbin.props.uri = 'file://' + pathname2url(os.path.abspath(sound))
+        path = abspath(sound)
+        if not exists(path):
+            raise PlaysoundException(u'File not found: {}'.format(path))
+        playbin.props.uri = 'file://' + pathname2url(path)
 
 
     set_result = playbin.set_state(Gst.State.PLAYING)
