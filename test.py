@@ -43,16 +43,16 @@ testCase           = None
 def mockMciSendStringW(command, buf, bufLen, bufStart):
     decodeCommand = command.decode('utf-16')
 
-    if command.startswith(u'open '):
+    if decodeCommand.startswith(u'open '):
         testCase.assertEqual(windll.winmm.mciSendStringW(command, buf, bufLen, bufStart), 306)  # 306 indicates drivers are missing. It's fine.
         return 0
     
-    if command.endswith(u' wait'):
+    if decodeCommand.endswith(u' wait'):
         testCase.assertEqual(windll.winmm.mciSendStringW(command, buf, bufLen, bufStart), 0)
         sleep(expectedDuration)
         return 0
 
-    if command.startswith(u'close '):
+    if decodeCommand.startswith(u'close '):
         global sawClose
         sawClose = True
         testCase.assertEqual(windll.winmm.mciSendStringW(command, buf, bufLen, bufStart), 0)
