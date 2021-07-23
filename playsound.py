@@ -16,6 +16,22 @@ def _playsoundWin(sound, block = True):
 
     I never would have tried using windll.winmm without seeing his code.
     '''
+    if any((c in sound for c in ' "\'()')):
+        from os       import close, remove
+        from os.path  import splitext
+        from shutil   import copy
+        from tempfile import mkstemp
+        
+        fd, tempPath = mkstemp(prefix = 'playsound_', suffix = splitext(sound)[1])
+        logger.info('Made a temporary copy of {} at {} - use other filenames with only safe characters to avoid this.'.format(sound, tempPath))
+        copy(sound, tempPath)
+        close(fd)  # mkstemp opens the file, but it must be closed before MCI can open it.
+        try:
+            _playsoundWin(tempPath, block)
+        finally:
+            remove(tempPath)
+        return
+
     from ctypes import c_buffer, windll
     from time   import sleep
 
@@ -30,10 +46,12 @@ def _playsoundWin(sound, block = True):
             exceptionMessage = ('\n    Error ' + str(errorCode) + ' for command:'
                                 '\n        ' + command.decode('utf-16') +
                                 '\n    ' + errorBuffer.raw.decode('utf-16').rstrip('\0'))
+            logger.error(exceptionMessage)
             raise PlaysoundException(exceptionMessage)
         return buf.value
 
-    sound = u'"{}"'.format(sound)
+    if '\\' in sound:
+        sound = '"' + sound + '"'
 
     try:
         logger.debug('Starting')

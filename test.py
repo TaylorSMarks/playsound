@@ -11,7 +11,7 @@ import logging
 logging.basicConfig(format = '%(asctime)s %(message)s', level = logging.DEBUG)
 
 system = system()
-isTravis = False #environ.get('TRAVIS', 'false') == 'true'
+isTravis = environ.get('TRAVIS', 'false') == 'true'
 
 if isTravis and system == 'Windows':
     print('\n>>> Will be mocking instead of using the real MciSendStringW function for most tests.\n')
@@ -29,7 +29,8 @@ if isTravis and system == 'Windows':
         # versions require python 3.3, utterly defeating the purpose of making
         # the library available on pypi.
         pipmain(['install', 'mock==2.0.0'])
-        from mock import patch
+        from mock   import patch
+        from ctypes import windll
 
 from playsound import playsound, PlaysoundException
 import unittest
@@ -37,15 +38,25 @@ import unittest
 durationMarginLow  = 0.2
 duratingMarginHigh = 2.0
 expectedDuration   = None
+testCase           = None
 
 def mockMciSendStringW(command, buf, bufLen, bufStart):
-    command = command.decode('utf-16')
+    decodeCommand = command.decode('utf-16')
+
+    if command.startswith(u'open '):
+        testCase.assertEqual(windll.winmm.mciSendStringW(command, buf, bufLen, bufStart), 306)  # 306 indicates drivers are missing. It's fine.
+        return 0
+    
+    if command.endswith(u' wait'):
+        testCase.assertEqual(windll.winmm.mciSendStringW(command, buf, bufLen, bufStart), 0)
+        sleep(expectedDuration)
+        return 0
+
     if command.startswith(u'close '):
         global sawClose
         sawClose = True
-    if command.endswith(u' wait'):
-        sleep(expectedDuration)
-    return 0
+        testCase.assertEqual(windll.winmm.mciSendStringW(command, buf, bufLen, bufStart), 0)
+        return 0
 
 class PlaysoundTests(unittest.TestCase):
     def helper(self, file, approximateDuration, block = True):
@@ -55,7 +66,8 @@ class PlaysoundTests(unittest.TestCase):
 
         if isTravis and system == 'Windows':
             with patch('ctypes.windll.winmm.mciSendStringW', side_effect = mockMciSendStringW):
-                global expectedDuration, sawClose
+                global expectedDuration, sawClose, testCase
+                testCase = self
                 sawClose = False
                 expectedDuration = approximateDuration
                 playsound(path, block = block)
@@ -73,11 +85,11 @@ class PlaysoundTests(unittest.TestCase):
 
     def testMissing(self):
         with self.assertRaises(PlaysoundException) as context:
-            playsound('notarealfile.wav')
+            playsound('fakefile.wav')
 
         message = str(context.exception).lower()
             
-        for sub in ['cannot', 'find', 'filename', 'notarealfile.wav']:
+        for sub in ['not', 'fakefile.wav']:
             self.assertIn(sub, message, '"{}" was expected in the exception message, but instead got: "{}"'.format(sub, message))
 
 if __name__ == '__main__':
