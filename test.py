@@ -42,20 +42,18 @@ expectedDuration   = None
 testCase           = None
 
 def mockMciSendStringW(command, buf, bufLen, bufStart):
-    decodeCommand = command.decode('utf-16')
-
     # Error code 305 ("Cannot specify extra characters after a string enclosed in quotation marks.") should never be tolerated.
     
-    if decodeCommand.startswith(u'close '):
+    if command.startswith(u'close '):
         global sawClose
         sawClose = True
         testCase.assertIn(originalMCISendStringW(command, buf, bufLen, bufStart), [0, 263])  # 263 indicates it's not opened or not recognized. It's fine.
         return 0
 
-    if decodeCommand.endswith(u' wait'):
+    if command.endswith(u' wait'):
         sleep(expectedDuration)
 
-    if decodeCommand.startswith(u'open ') or decodeCommand.startswith(u'play '):
+    if command.startswith(u'open ') or command.startswith(u'play '):
         testCase.assertIn(originalMCISendStringW(command, buf, bufLen, bufStart), [0, 306])  # 306 indicates drivers are missing. It's fine.
         return 0
 
