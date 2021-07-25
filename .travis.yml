@@ -21,13 +21,13 @@ jobs:
          - sudo apt-get install gstreamer1.0-tools gir1.2-gstreamer-1.0 gir1.2-gst-plugins-base-1.0 gstreamer1.0-plugins-good gstreamer1.0-plugins-ugly gstreamer1.0-plugins-bad gstreamer1.0-libav
       virtualenv:
         system_site_packages: true  # Needed for python to be able to access gi on Linux.
-    - name: "Python 2.7 on Ubuntu 14 (Trusty)"
-      dist: trusty
-      python: 2.7
-      before_install:
-        - sudo apt-get install python-gi gstreamer1.0-tools gir1.2-gstreamer-1.0 gir1.2-gst-plugins-base-1.0 gstreamer1.0-plugins-good gstreamer1.0-plugins-ugly gstreamer1.0-plugins-bad gstreamer1.0-libav
-      virtualenv:
-        system_site_packages: true  # Needed for python to be able to access gi on Linux.
+#    - name: "Python 2.7 on Ubuntu 14 (Trusty)"
+#      dist: trusty
+#      python: 2.7
+#      before_install:
+#        - sudo apt-get install python-gi gstreamer1.0-tools gir1.2-gstreamer-1.0 gir1.2-gst-plugins-base-1.0 gstreamer1.0-plugins-good gstreamer1.0-plugins-ugly gstreamer1.0-plugins-bad gstreamer1.0-libav
+#      virtualenv:
+#        system_site_packages: true  # Needed for python to be able to access gi on Linux.
     
     # >>> Each macOS Run costs ~250 Build Credits - running both macOSs costs ~500 Build Credits. Read NOTE at top.
     

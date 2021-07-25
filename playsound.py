@@ -46,20 +46,22 @@ def _playsoundWin(sound, block = True):
             remove(tempPath)
         return
 
-    from ctypes import c_buffer, windll
+    from ctypes import create_unicode_buffer, windll, wintypes
     from time   import sleep
+    windll.winmm.mciSendStringW.argtypes = [wintypes.LPCWSTR, wintypes.LPWSTR, wintypes.UINT, wintypes.HANDLE]
+    windll.winmm.mciGetErrorStringW.argtypes = [wintypes.DWORD, wintypes.LPWSTR, wintypes.UINT]
 
     def winCommand(*command):
         bufLen = 600
-        buf = c_buffer(bufLen)
-        command = ' '.join(command).encode('utf-16')
+        buf = create_unicode_buffer(bufLen)
+        command = ' '.join(command)
         errorCode = int(windll.winmm.mciSendStringW(command, buf, bufLen - 1, 0))  # use widestring version of the function
         if errorCode:
-            errorBuffer = c_buffer(bufLen)
+            errorBuffer = create_unicode_buffer(bufLen)
             windll.winmm.mciGetErrorStringW(errorCode, errorBuffer, bufLen - 1)  # use widestring version of the function
             exceptionMessage = ('\n    Error ' + str(errorCode) + ' for command:'
-                                '\n        ' + command.decode('utf-16') +
-                                '\n    ' + errorBuffer.raw.decode('utf-16').rstrip('\0'))
+                                '\n        ' + command +
+                                '\n    ' + errorBuffer.value)
             logger.error(exceptionMessage)
             raise PlaysoundException(exceptionMessage)
         return buf.value
