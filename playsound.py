@@ -28,23 +28,7 @@ def _playsoundWin(sound, block = True):
 
     I never would have tried using windll.winmm without seeing his code.
     '''
-    sound = _canonicalizePath(sound)
-
-    if any((c in sound for c in ' "\'()')):
-        from os       import close, remove
-        from os.path  import splitext
-        from shutil   import copy
-        from tempfile import mkstemp
-        
-        fd, tempPath = mkstemp(prefix = 'PS', suffix = splitext(sound)[1])  # Avoid generating files longer than 8.3 characters.
-        logger.info('Made a temporary copy of {} at {} - use other filenames with only safe characters to avoid this.'.format(sound, tempPath))
-        copy(sound, tempPath)
-        close(fd)  # mkstemp opens the file, but it must be closed before MCI can open it.
-        try:
-            _playsoundWin(tempPath, block)
-        finally:
-            remove(tempPath)
-        return
+    sound = '"' + _canonicalizePath(sound) + '"'
 
     from ctypes import create_unicode_buffer, windll, wintypes
     from time   import sleep
@@ -65,9 +49,6 @@ def _playsoundWin(sound, block = True):
             logger.error(exceptionMessage)
             raise PlaysoundException(exceptionMessage)
         return buf.value
-
-    if '\\' in sound:
-        sound = '"' + sound + '"'
 
     try:
         logger.debug('Starting')
