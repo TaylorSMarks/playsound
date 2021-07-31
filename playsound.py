@@ -72,15 +72,21 @@ def _playsoundWin(sound, block = True):
         removalList=[]
         #look through list of recent sounds, and if they are no longer playing, put on removal list
         for i in range(len(garbageCollection)):
-            if winCommand(u'status {}{}'.format(garbageCollection[i], ' mode'))!="playing":
-                print("adding",garbageCollection[i],"to garbage collector removal list.")
-                removalList.append(i)
+            try:
+                if winCommand(u'status {}{}'.format(garbageCollection[i], ' mode'))!="playing":
+                    print("adding",garbageCollection[i],"to garbage collector removal list.")
+                    removalList.append(i)
+            except: 
+                pass
         #close sounds on removal list, starting from top to bottom so to avoid indexing issues
         #as the list shrinks
         for i in range(len(removalList)-1,-1,-1):
             if garbageCollection[removalList[i]]!="": #ignore an empty list item
                 print("closing",garbageCollection[removalList[i]],"at index",removalList[i])
-                winCommand(u'close {}'.format(garbageCollection[removalList[i]]))
+                try:
+                    winCommand(u'close {}'.format(garbageCollection[removalList[i]]))
+                except:
+                    pass
                 del garbageCollection[removalList[i]] #remove that item from the garbage collection
 
     if '\\' in sound:
