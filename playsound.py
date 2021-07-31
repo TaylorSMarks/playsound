@@ -1,6 +1,8 @@
 import logging
 logger = logging.getLogger(__name__)
 
+garbageCollection=[]
+
 class PlaysoundException(Exception):
     pass
 
@@ -66,8 +68,26 @@ def _playsoundWin(sound, block = True):
             raise PlaysoundException(exceptionMessage)
         return buf.value
 
+    def collectGarbage():
+        removalList=[]
+        #look through list of recent sounds, and if they are no longer playing, put on removal list
+        for i in range(len(garbageCollection)):
+            if winCommand(u'status {}{}'.format(garbageCollection[i], ' mode'))!="playing":
+                print("adding",garbageCollection[i],"to garbage collector removal list.")
+                removalList.append(i)
+        #close sounds on removal list, starting from top to bottom so to avoid indexing issues
+        #as the list shrinks
+        for i in range(len(removalList)-1,-1,-1):
+            if garbageCollection[removalList[i]]!="": #ignore an empty list item
+                print("closing",garbageCollection[removalList[i]],"at index",removalList[i])
+                winCommand(u'close {}'.format(garbageCollection[removalList[i]]))
+                del garbageCollection[removalList[i]] #remove that item from the garbage collection
+
     if '\\' in sound:
         sound = '"' + sound + '"'
+
+    collectGarbage() # before playing new sound, remove sounds that have finished playing
+    garbageCollection.append(sound) # add the new sound to the list for checking next time around
 
     try:
         logger.debug('Starting')
@@ -76,7 +96,8 @@ def _playsoundWin(sound, block = True):
         logger.debug('Returning')
     finally:
         try:
-            winCommand(u'close {}'.format(sound))
+            #winCommand(u'close {}'.format(sound)) -> this is closing asynchronous play early
+            pass
         except PlaysoundException:
             logger.warning(u'Failed to close the file: {}'.format(sound))
             # If it fails, there's nothing more that can be done...
@@ -261,3 +282,4 @@ if __name__ == '__main__':
     # block is always True if you choose to run this from the command line.
     from sys import argv
     playsound(argv[1])
+    
