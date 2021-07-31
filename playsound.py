@@ -74,7 +74,7 @@ def _playsoundWin(sound, block = True):
         for i in range(len(garbageCollection)):
             try:
                 if winCommand(u'status {}{}'.format(garbageCollection[i], ' mode'))!="playing":
-                    print("adding",garbageCollection[i],"to garbage collector removal list.")
+                    #print("adding",garbageCollection[i],"to garbage collector removal list.")
                     removalList.append(i)
             except: 
                 pass
@@ -82,7 +82,7 @@ def _playsoundWin(sound, block = True):
         #as the list shrinks
         for i in range(len(removalList)-1,-1,-1):
             if garbageCollection[removalList[i]]!="": #ignore an empty list item
-                print("closing",garbageCollection[removalList[i]],"at index",removalList[i])
+                #print("closing",garbageCollection[removalList[i]],"at index",removalList[i])
                 try:
                     winCommand(u'close {}'.format(garbageCollection[removalList[i]]))
                 except:
@@ -92,13 +92,12 @@ def _playsoundWin(sound, block = True):
     if '\\' in sound:
         sound = '"' + sound + '"'
 
-    collectGarbage() # before playing new sound, remove sounds that have finished playing
-    garbageCollection.append(sound) # add the new sound to the list for checking next time around
-
     try:
         logger.debug('Starting')
         winCommand(u'open {}'.format(sound))
-        winCommand(u'play {}{}'.format(sound, ' wait' if block else ''))
+        winCommand(u'play {}{}'.format(sound, ' wait' if block else ''))        
+        collectGarbage() # before playing new sound, remove sounds that have finished playing
+        garbageCollection.append(sound) # add the new sound to the list for checking next time around
         logger.debug('Returning')
     finally:
         try:
@@ -288,4 +287,3 @@ if __name__ == '__main__':
     # block is always True if you choose to run this from the command line.
     from sys import argv
     playsound(argv[1])
-    
