@@ -1,4 +1,5 @@
 import logging
+from random import randint
 logger = logging.getLogger(__name__)
 
 class PlaysoundException(Exception):
@@ -28,40 +29,58 @@ def _playsoundWin(sound, block = True):
 
     I never would have tried using windll.winmm without seeing his code.
     '''
-    sound = '"' + _canonicalizePath(sound) + '"'
+    sound = _canonicalizePath(sound)
+    alias = "hiro{}".format(randint(1, 100000)) #to resolve alias error
 
-    from ctypes import create_unicode_buffer, windll, wintypes
+    if any((c in sound for c in ' "\'()')):
+        from os       import close, remove
+        from os.path  import splitext
+        from shutil   import copy
+        from tempfile import mkstemp
+        
+        fd, tempPath = mkstemp(prefix = 'PS', suffix = splitext(sound)[1])  # Avoid generating files longer than 8.3 characters.
+        logger.info('Made a temporary copy of {} at {} - use other filenames with only safe characters to avoid this.'.format(sound, tempPath))
+        copy(sound, tempPath)
+        close(fd)  # mkstemp opens the file, but it must be closed before MCI can open it.
+        try:
+            _playsoundWin(tempPath, block)
+        finally:
+            remove(tempPath)
+        return
+
+    from ctypes import c_buffer, windll
     from time   import sleep
-    windll.winmm.mciSendStringW.argtypes = [wintypes.LPCWSTR, wintypes.LPWSTR, wintypes.UINT, wintypes.HANDLE]
-    windll.winmm.mciGetErrorStringW.argtypes = [wintypes.DWORD, wintypes.LPWSTR, wintypes.UINT]
 
     def winCommand(*command):
         bufLen = 600
-        buf = create_unicode_buffer(bufLen)
-        command = ' '.join(command)
+        buf = c_buffer(bufLen)
+        command = ' '.join(command).encode('utf-16')
         errorCode = int(windll.winmm.mciSendStringW(command, buf, bufLen - 1, 0))  # use widestring version of the function
         if errorCode:
-            errorBuffer = create_unicode_buffer(bufLen)
+            errorBuffer = c_buffer(bufLen)
             windll.winmm.mciGetErrorStringW(errorCode, errorBuffer, bufLen - 1)  # use widestring version of the function
             exceptionMessage = ('\n    Error ' + str(errorCode) + ' for command:'
-                                '\n        ' + command +
-                                '\n    ' + errorBuffer.value)
+                                '\n        ' + command.decode('utf-16') +
+                                '\n    ' + errorBuffer.raw.decode('utf-16').rstrip('\0'))
             logger.error(exceptionMessage)
             raise PlaysoundException(exceptionMessage)
         return buf.value
 
+    if '\\' in sound:
+        sound = '"' + sound + '"'
+
     try:
+        start=0 
         logger.debug('Starting')
-        winCommand(u'open {}'.format(sound))
-        winCommand(u'play {}{}'.format(sound, ' wait' if block else ''))
+        winCommand('open {} alias {}'.format(sound,alias))
+        winCommand('play {} from {} {}'.format(alias,start,'wait' if block else ''))
         logger.debug('Returning')
     finally:
         try:
-            winCommand(u'close {}'.format(sound))
+            winCommand('stop {}'.format(alias))
         except PlaysoundException:
-            logger.warning(u'Failed to close the file: {}'.format(sound))
+            logger.warning('Failed to close the file: {} {}'.format(sound,alias))
             # If it fails, there's nothing more that can be done...
-            pass
 
 def _handlePathOSX(sound):
     sound = _canonicalizePath(sound)
@@ -154,7 +173,7 @@ def _playsoundNix(sound, block = True):
     else:
         path = abspath(sound)
         if not exists(path):
-            raise PlaysoundException(u'File not found: {}'.format(path))
+            raise PlaysoundException('File not found: {}'.format(path))
         playbin.props.uri = 'file://' + pathname2url(path)
 
 
