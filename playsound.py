@@ -49,7 +49,6 @@ def _playsoundWin(sound, block = True):
         return
 
     from ctypes import c_buffer, windll
-    from time   import sleep
 
     def winCommand(*command):
         bufLen = 600
@@ -70,14 +69,14 @@ def _playsoundWin(sound, block = True):
         sound = '"' + sound + '"'
 
     try:
-        start=0 
+        start = 0
         logger.debug('Starting')
-        winCommand('open {} alias {}'.format(sound,alias))
-        winCommand('play {} from {} {}'.format(alias,start,'wait' if block else ''))
+        winCommand(u'open {} alias {}'.format(sound, alias))
+        winCommand(u'play {} from {} {}'.format(alias, start, 'wait' if block else ''))
         logger.debug('Returning')
     finally:
         try:
-            winCommand('stop {}'.format(alias))
+            winCommand(u'stop {}'.format(alias))
         except PlaysoundException:
             logger.warning('Failed to close the file: {} {}'.format(sound,alias))
             # If it fails, there's nothing more that can be done...
