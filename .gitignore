@@ -19,6 +19,7 @@ lib/
 lib64/
 parts/
 sdist/
+venv
 var/
 *.egg-info/
 .installed.cfg
@@ -57,3 +58,8 @@ docs/_build/
 
 # PyBuilder
 target/
+
+#Hiro
+playsound1.py
+test1.py
+playsound1.py
