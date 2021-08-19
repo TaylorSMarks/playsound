@@ -80,17 +80,18 @@ def _playsoundWin(sound, block=True):
     file_not_found = False
     try:
         logger.debug('Starting')
-        winCommand(u'open {} alias {}'.format(sound,
-                                              alias))
+        winCommand('open {} alias {}'.format(sound,
+                                             alias))
         # alias - fixes special letters in file-name error
     except:
         file_not_found = True
     finally:
         if file_not_found:
-            raise PlaysoundException(u'File not found: {}'.format(sound))
-        winCommand(u'play {} {}'.format(sound, 'wait' if block else ''))
+            raise PlaysoundException('File not found: {}'.format(sound))
+        winCommand('play {} {}'.format(sound, 'wait' if block else ''))
         logger.debug('Returning')
         # winCommand(u'stop {}'.format(alias))
+        # logger.warning(u'Failed to close the file: {}'.format(sound))
 
 
 def _handlePathOSX(sound):
