@@ -1,8 +1,12 @@
 import logging
+from random import randint
+
 logger = logging.getLogger(__name__)
+
 
 class PlaysoundException(Exception):
     pass
+
 
 def _canonicalizePath(path):
     """
@@ -16,7 +20,8 @@ def _canonicalizePath(path):
         # convert a unicode string to str will fail. Leave it alone in this case.
         return path
 
-def _playsoundWin(sound, block = True):
+
+def _playsoundWin(sound, block=True):
     '''
     Utilizes windll.winmm. Tested and known to work with MP3 and WAVE on
     Windows 7 with Python 2.7. Probably works with more file formats.
@@ -28,40 +33,68 @@ def _playsoundWin(sound, block = True):
 
     I never would have tried using windll.winmm without seeing his code.
     '''
-    sound = '"' + _canonicalizePath(sound) + '"'
+    sound = _canonicalizePath(sound)
+    alias = "hiro{}".format(randint(1, 100000))  # to resolve alias error
 
-    from ctypes import create_unicode_buffer, windll, wintypes
-    from time   import sleep
-    windll.winmm.mciSendStringW.argtypes = [wintypes.LPCWSTR, wintypes.LPWSTR, wintypes.UINT, wintypes.HANDLE]
-    windll.winmm.mciGetErrorStringW.argtypes = [wintypes.DWORD, wintypes.LPWSTR, wintypes.UINT]
+    if any((c in sound for c in ' "\'()')):
+        from os import close, remove
+        from os.path import splitext
+        from shutil import copy
+        from tempfile import mkstemp
+
+        fd, tempPath = mkstemp(prefix='PS',
+                               suffix=splitext(sound)[1])  # Avoid generating files longer than 8.3 characters.
+        logger.info(
+            'Made a temporary copy of {} at {} - use other filenames with only safe characters to avoid this.'.format(
+                sound, tempPath))
+        copy(sound, tempPath)
+        close(fd)  # mkstemp opens the file, but it must be closed before MCI can open it.
+        try:
+            _playsoundWin(tempPath, block)
+        finally:
+            remove(tempPath)
+        return
+
+    from ctypes import c_buffer, windll
 
     def winCommand(*command):
         bufLen = 600
-        buf = create_unicode_buffer(bufLen)
-        command = ' '.join(command)
-        errorCode = int(windll.winmm.mciSendStringW(command, buf, bufLen - 1, 0))  # use widestring version of the function
+        buf = c_buffer(bufLen)
+        command = ' '.join(command).encode('utf-16')
+        errorCode = int(
+            windll.winmm.mciSendStringW(command, buf, bufLen - 1, 0))  # use widestring version of the function
         if errorCode:
-            errorBuffer = create_unicode_buffer(bufLen)
-            windll.winmm.mciGetErrorStringW(errorCode, errorBuffer, bufLen - 1)  # use widestring version of the function
+            errorBuffer = c_buffer(bufLen)
+            windll.winmm.mciGetErrorStringW(errorCode, errorBuffer,
+                                            bufLen - 1)  # use widestring version of the function
             exceptionMessage = ('\n    Error ' + str(errorCode) + ' for command:'
-                                '\n        ' + command +
-                                '\n    ' + errorBuffer.value)
-            logger.error(exceptionMessage)
+                                                                  '\n        ' + command.decode('utf-16') +
+                                '\n    ' + errorBuffer.raw.decode('utf-16').rstrip('\0'))
+            # logger.error(exceptionMessage)
             raise PlaysoundException(exceptionMessage)
-        return buf.value
+        return errorCode
 
+    if '\\' in sound:
+        sound = '"' + sound + '"'
+
+    find = 0
     try:
+        start = 0
         logger.debug('Starting')
-        winCommand(u'open {}'.format(sound))
-        winCommand(u'play {}{}'.format(sound, ' wait' if block else ''))
-        logger.debug('Returning')
+        winCommand(u'open {} alias {}'.format(sound,
+                                              alias))  # alias - fixes the error associated with too many letters while closing
+    except:
+        find = 1
     finally:
-        try:
-            winCommand(u'close {}'.format(sound))
-        except PlaysoundException:
-            logger.warning(u'Failed to close the file: {}'.format(sound))
-            # If it fails, there's nothing more that can be done...
-            pass
+        if find:
+            raise PlaysoundException(u'File not found: {}'.format(sound))
+        winCommand('play {} {}'.format(sound, 'wait' if block else ''))
+        logger.debug(u'Returning')
+        # try:
+        #     winCommand(u'stop {}'.format(alias))
+        # except:
+        #     logger.warning('Failed to close the file: {} {}. File closed on its on'.format(sound, alias))
+        #
 
 def _handlePathOSX(sound):
     sound = _canonicalizePath(sound)
@@ -86,7 +119,7 @@ def _handlePathOSX(sound):
         return parts[0] + '://' + quote(parts[1].encode('utf-8')).replace(' ', '%20')
 
 
-def _playsoundOSX(sound, block = True):
+def _playsoundOSX(sound, block=True):
     '''
     Utilizes AppKit.NSSound. Tested and known to work with MP3 and WAVE on
     OS X 10.11 with Python 2.7. Probably works with anything QuickTime supports.
@@ -106,10 +139,10 @@ def _playsoundOSX(sound, block = True):
         from AppKit import NSSound
 
     from Foundation import NSURL
-    from time       import sleep
+    from time import sleep
 
     sound = _handlePathOSX(sound)
-    url   = NSURL.URLWithString_(sound)
+    url = NSURL.URLWithString_(sound)
     if not url:
         raise PlaysoundException('Cannot find a sound with filename: ' + sound)
 
@@ -126,7 +159,8 @@ def _playsoundOSX(sound, block = True):
     if block:
         sleep(nssound.duration())
 
-def _playsoundNix(sound, block = True):
+
+def _playsoundNix(sound, block=True):
     """Play a sound using GStreamer.
 
     Inspired by this:
@@ -154,9 +188,8 @@ def _playsoundNix(sound, block = True):
     else:
         path = abspath(sound)
         if not exists(path):
-            raise PlaysoundException(u'File not found: {}'.format(path))
+            raise PlaysoundException('File not found: {}'.format(path))
         playbin.props.uri = 'file://' + pathname2url(path)
-
 
     set_result = playbin.set_state(Gst.State.PLAYING)
     if set_result != Gst.StateChangeReturn.ASYNC:
@@ -172,18 +205,19 @@ def _playsoundNix(sound, block = True):
             bus.poll(Gst.MessageType.EOS, Gst.CLOCK_TIME_NONE)
         finally:
             playbin.set_state(Gst.State.NULL)
-            
+
     logger.debug('Finishing play')
 
-def _playsoundAnotherPython(otherPython, sound, block = True, macOS = False):
+
+def _playsoundAnotherPython(otherPython, sound, block=True, macOS=False):
     '''
     Mostly written so that when this is run on python3 on macOS, it can invoke
     python2 on macOS... but maybe this idea could be useful on linux, too.
     '''
-    from inspect    import getsourcefile
-    from os.path    import abspath, exists
+    from inspect import getsourcefile
+    from os.path import abspath, exists
     from subprocess import check_call
-    from threading  import Thread
+    from threading import Thread
 
     sound = _canonicalizePath(sound)
 
@@ -195,7 +229,7 @@ def _playsoundAnotherPython(otherPython, sound, block = True, macOS = False):
             except BaseException as e:
                 self.exc = e
 
-        def join(self, timeout = None):
+        def join(self, timeout=None):
             super().join(timeout)
             if self.exc:
                 raise self.exc
@@ -206,12 +240,15 @@ def _playsoundAnotherPython(otherPython, sound, block = True, macOS = False):
         raise PlaysoundException('Cannot find a sound with filename: ' + sound)
 
     playsoundPath = abspath(getsourcefile(lambda: 0))
-    t = PropogatingThread(target = lambda: check_call([otherPython, playsoundPath, _handlePathOSX(sound) if macOS else sound]))
+    t = PropogatingThread(
+        target=lambda: check_call([otherPython, playsoundPath, _handlePathOSX(sound) if macOS else sound]))
     t.start()
     if block:
         t.join()
 
+
 from platform import system
+
 system = system()
 
 if system == 'Windows':
@@ -219,26 +256,32 @@ if system == 'Windows':
 elif system == 'Darwin':
     playsound = _playsoundOSX
     import sys
+
     if sys.version_info[0] > 2:
         try:
             from AppKit import NSSound
         except ImportError:
-            logger.warning("playsound is relying on a python 2 subprocess. Please use `pip3 install PyObjC` if you want playsound to run more efficiently.")
-            playsound = lambda sound, block = True: _playsoundAnotherPython('/System/Library/Frameworks/Python.framework/Versions/2.7/bin/python', sound, block, macOS = True)
+            logger.warning(
+                "playsound is relying on a python 2 subprocess. Please use `pip3 install PyObjC` if you want playsound to run more efficiently.")
+            playsound = lambda sound, block=True: _playsoundAnotherPython(
+                '/System/Library/Frameworks/Python.framework/Versions/2.7/bin/python', sound, block, macOS=True)
 else:
     playsound = _playsoundNix
     if __name__ != '__main__':  # Ensure we don't infinitely recurse trying to get another python instance.
         try:
             import gi
+
             gi.require_version('Gst', '1.0')
             from gi.repository import Gst
         except:
-            logger.warning("playsound is relying on another python subprocess. Please use `pip install pygobject` if you want playsound to run more efficiently.")
-            playsound = lambda sound, block = True: _playsoundAnotherPython('/usr/bin/python3', sound, block, macOS = False)
+            logger.warning(
+                "playsound is relying on another python subprocess. Please use `pip install pygobject` if you want playsound to run more efficiently.")
+            playsound = lambda sound, block=True: _playsoundAnotherPython('/usr/bin/python3', sound, block, macOS=False)
 
 del system
 
 if __name__ == '__main__':
     # block is always True if you choose to run this from the command line.
     from sys import argv
+
     playsound(argv[1])
