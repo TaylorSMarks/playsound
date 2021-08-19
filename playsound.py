@@ -88,9 +88,9 @@ def _playsoundWin(sound, block=True):
         file_not_found = True
     finally:
         if file_not_found:
-            raise PlaysoundException('File not found: {}'.format(sound))
+            raise PlaysoundException(u'File not found: {}'.format(sound))
         winCommand(u'play {} {}'.format(sound, 'wait' if block else ''))
-        logger.debug('Returning')
+        logger.debug(u'Returning')
         # winCommand(u'stop {}'.format(alias))
 
 
