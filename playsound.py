@@ -1,8 +1,12 @@
 import logging
+
+
 logger = logging.getLogger(__name__)
+
 
 class PlaysoundException(Exception):
     pass
+
 
 def _canonicalizePath(path):
     """
@@ -28,7 +32,7 @@ def _playsoundWin(sound, block = True):
 
     I never would have tried using windll.winmm without seeing his code.
     '''
-    sound = '"' + _canonicalizePath(sound) + '"'
+    sound = u'"%s"' % _canonicalizePath(sound)
 
     from ctypes import create_unicode_buffer, windll, wintypes
     from time   import sleep
@@ -43,12 +47,9 @@ def _playsoundWin(sound, block = True):
         if errorCode:
             errorBuffer = create_unicode_buffer(bufLen)
             windll.winmm.mciGetErrorStringW(errorCode, errorBuffer, bufLen - 1)  # use widestring version of the function
-            exceptionMessage = ('\n    Error ' + str(errorCode) + ' for command:'
-                                '\n        ' + command +
-                                '\n    ' + errorBuffer.value)
+            exceptionMessage = '\n    Error %s for command:\n        %s\n    %s' % (errorCode, command, errorBuffer.value)
             logger.error(exceptionMessage)
             raise PlaysoundException(exceptionMessage)
-        return buf.value
 
     try:
         logger.debug('Starting')
@@ -84,7 +85,6 @@ def _handlePathOSX(sound):
 
         parts = sound.split('://', 1)
         return parts[0] + '://' + quote(parts[1].encode('utf-8')).replace(' ', '%20')
-
 
 def _playsoundOSX(sound, block = True):
     '''
