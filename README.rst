@@ -25,7 +25,7 @@ Once you've installed, you can really quickly verified that it works with just t
 .. code-block:: python
 
     >>> from playsound import playsound
-    >>> playsound('/path/to/a/sound/file/you/want/to/play.mp3') 
+    >>> playsound('\\path\\to\\a\\sound\\file\\you\\want\\to\\play.mp3') 
 
 Documentation
 -------------
