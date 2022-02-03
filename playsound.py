@@ -1,6 +1,8 @@
 import logging
 logger = logging.getLogger(__name__)
 
+_openedSoundsWin = []
+
 class PlaysoundException(Exception):
     pass
 
@@ -52,12 +54,20 @@ def _playsoundWin(sound, block = True):
 
     try:
         logger.debug('Starting')
+        if (sound in _openedSoundsWin):
+            winCommand(u'close {}'.format(sound))
+            _openedSoundsWin.remove(sound)
         winCommand(u'open {}'.format(sound))
         winCommand(u'play {}{}'.format(sound, ' wait' if block else ''))
+        if not block:
+            _openedSoundsWin.append(sound)
         logger.debug('Returning')
     finally:
         try:
-            winCommand(u'close {}'.format(sound))
+            if (block):
+                winCommand(u'close {}'.format(sound))
+            else:
+                pass
         except PlaysoundException:
             logger.warning(u'Failed to close the file: {}'.format(sound))
             # If it fails, there's nothing more that can be done...
