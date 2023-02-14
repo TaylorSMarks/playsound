@@ -20,7 +20,7 @@ https://github.com/TaylorSMarks/playsound
 
 Quick Start
 -----------
-Once you've installed, you can really quickly verified that it works with just this:
+Once you've installed, you can really quickly verify that it works with just this:
 
 .. code-block:: python
 
@@ -29,9 +29,9 @@ Once you've installed, you can really quickly verified that it works with just t
 
 Documentation
 -------------
-The playsound module contains only one thing - the function (also named) playsound.
+The playsound module contains only one thing - the function (also named playsound).
 
-It requires one argument - the path to the file with the sound you'd like to play. This may be a local file, or a URL.
+It requires just one argument - the path to the file which you'd like to play. This may be a local file, or a URL.
 
 There's an optional second argument, block, which is set to True by default. Setting it to False makes the function run asynchronously.
 
