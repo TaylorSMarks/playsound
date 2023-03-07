@@ -51,6 +51,6 @@ You can check the Travis-CI status for Playsound here: https://travis-ci.com/git
 
 Copyright
 ---------
-This software is Copyright (c) 2021 Taylor Marks <taylor@marksfam.com>.
+This software is Copyright (c) 2023 Taylor Marks <taylor@marksfam.com>.
 
 See the bundled LICENSE file for more information.
