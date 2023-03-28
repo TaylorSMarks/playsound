@@ -31,14 +31,12 @@ def _playsoundWin(sound, block = True):
     sound = '"' + _canonicalizePath(sound) + '"'
 
     from ctypes import create_unicode_buffer, windll, wintypes
-    from time   import sleep
     windll.winmm.mciSendStringW.argtypes = [wintypes.LPCWSTR, wintypes.LPWSTR, wintypes.UINT, wintypes.HANDLE]
     windll.winmm.mciGetErrorStringW.argtypes = [wintypes.DWORD, wintypes.LPWSTR, wintypes.UINT]
 
-    def winCommand(*command):
+    def winCommand(command):
         bufLen = 600
         buf = create_unicode_buffer(bufLen)
-        command = ' '.join(command)
         errorCode = int(windll.winmm.mciSendStringW(command, buf, bufLen - 1, 0))  # use widestring version of the function
         if errorCode:
             errorBuffer = create_unicode_buffer(bufLen)
@@ -48,11 +46,10 @@ def _playsoundWin(sound, block = True):
                                 '\n    ' + errorBuffer.value)
             logger.error(exceptionMessage)
             raise PlaysoundException(exceptionMessage)
-        return buf.value
 
+    logger.debug('Starting')
+    winCommand(u'open {}'.format(sound))
     try:
-        logger.debug('Starting')
-        winCommand(u'open {}'.format(sound))
         winCommand(u'play {}{}'.format(sound, ' wait' if block else ''))
         logger.debug('Returning')
     finally:
@@ -61,7 +58,6 @@ def _playsoundWin(sound, block = True):
         except PlaysoundException:
             logger.warning(u'Failed to close the file: {}'.format(sound))
             # If it fails, there's nothing more that can be done...
-            pass
 
 def _handlePathOSX(sound):
     sound = _canonicalizePath(sound)
