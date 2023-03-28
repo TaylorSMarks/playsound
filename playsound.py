@@ -46,31 +46,38 @@ def _playsoundWin(sound, block = True):
             exceptionMessage = ('\n    Error ' + str(errorCode) + ' for command:'
                                 '\n        ' + command +
                                 '\n    ' + errorBuffer.value)
-            logger.error(exceptionMessage)
             raise PlaysoundException(exceptionMessage)
 
     logger.debug('Starting')
-    winCommand(u'open {}'.format(sound))
-    for old in _openedSoundsWin.copy():
+    if sound in _openedSoundsWin:
         try:
-            winCommand(u'close {}'.format(old))
+            winCommand(u'close {}'.format(sound))
         except PlaysoundException:
-            logger.warning(u'Failed to close the file: {}'.format(old))
-        _openedSoundsWin.remove(old)
+            logger.debug(u'Failed to close the file before open: {}'.format(sound))
+
+    try:
+        winCommand(u'open {}'.format(sound))
+    except PlaysoundException as e:
+        logger.error(e)
+        raise e
+    _openedSoundsWin.append(sound)
+
     try:
         winCommand(u'play {}{}'.format(sound, ' wait' if block else ''))
-        if not block:
-            _openedSoundsWin.append(sound)
         logger.debug('Returning')
     except PlaysoundException as e:
-        winCommand(u'close {}'.format(sound))
+        logger.error(e)
+        try:
+            winCommand(u'close {}'.format(sound))
+        except PlaysoundException:
+            logger.warning(u'Failed to close the file after play: {}'.format(sound))
         raise e
     finally:
         if block:
             try:
                 winCommand(u'close {}'.format(sound))
             except PlaysoundException:
-                logger.warning(u'Failed to close the file: {}'.format(sound))
+                logger.warning(u'Failed to close the file after play: {}'.format(sound))
                 # If it fails, there's nothing more that can be done...
 
 def _handlePathOSX(sound):
