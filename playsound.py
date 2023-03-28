@@ -51,26 +51,27 @@ def _playsoundWin(sound, block = True):
 
     logger.debug('Starting')
     winCommand(u'open {}'.format(sound))
+    for old in _openedSoundsWin.copy():
+        try:
+            winCommand(u'close {}'.format(old))
+        except PlaysoundException:
+            logger.warning(u'Failed to close the file: {}'.format(old))
+        _openedSoundsWin.remove(old)
     try:
-        for old in _openedSoundsWin.copy():
-            try:
-                winCommand(u'close {}'.format(old))
-            except PlaysoundException:
-                logger.warning(u'Failed to close the file: {}'.format(old))
-            _openedSoundsWin.remove(old)
         winCommand(u'play {}{}'.format(sound, ' wait' if block else ''))
         if not block:
             _openedSoundsWin.append(sound)
         logger.debug('Returning')
+    except PlaysoundException as e:
+        winCommand(u'close {}'.format(sound))
+        raise e
     finally:
-        try:
-            if (block):
+        if block:
+            try:
                 winCommand(u'close {}'.format(sound))
-            else:
-                pass
-        except PlaysoundException:
-            logger.warning(u'Failed to close the file: {}'.format(sound))
-            # If it fails, there's nothing more that can be done...
+            except PlaysoundException:
+                logger.warning(u'Failed to close the file: {}'.format(sound))
+                # If it fails, there's nothing more that can be done...
 
 def _handlePathOSX(sound):
     sound = _canonicalizePath(sound)
