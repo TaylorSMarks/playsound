@@ -1,9 +1,8 @@
 from codecs     import open
-from inspect    import getsource
 from os.path    import abspath, dirname, join
 from setuptools import setup
 
-here = abspath(dirname(getsource(lambda:0)))
+here = abspath(dirname(__file__))
 
 with open(join(here, 'README.rst'), encoding='utf-8') as f:
     long_description = f.read()
