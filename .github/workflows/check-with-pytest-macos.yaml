@@ -27,4 +27,5 @@ jobs:
 
       - name: Test with pytest
         run: |
-          pytest tests --log-cli-level=WARNING
+          export LOGLEVEL=DEBUG
+          timeout 60 pytest tests --log-cli-level=WARNING
