@@ -1,3 +1,3 @@
-from playsound3.playsound3 import playsound
+from playsound3.playsound3 import AVAILABLE_BACKENDS, playsound
 
-__all__ = ["playsound"]
+__all__ = ["playsound", "AVAILABLE_BACKENDS"]
