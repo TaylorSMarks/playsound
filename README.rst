@@ -10,7 +10,11 @@ Install via pip:
 
     $ pip install playsound
 
-Done.
+Done. Or, via conda,
+
+.. code-block:: bash
+
+    $ conda install -c conda-forge playsound
 
 If you insist on the (slightly) harder way of installing, from source,
 you know how to do it already and don't need my help.
