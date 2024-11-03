@@ -4,6 +4,39 @@ logger = logging.getLogger(__name__)
 class PlaysoundException(Exception):
     pass
 
+def sound_duration(sound: str) -> int:
+    """
+    Get the duration of a sound file
+
+    Args:
+        sound (str): Sound filename
+
+    Returns:
+        int: Duration in seconds
+    """
+
+    from os.path import splitext
+
+    logger.debug('Getting duration from sound file {}'.format(sound))
+    ext = splitext(sound)[1]
+    match ext:
+        case '.mp3':
+            from mutagen.mp3 import MP3
+            duration = MP3
+
+        case '.wav':
+            from mutagen.wave import WAVE
+            duration = WAVE
+
+        case _:
+            logger.error('No code for extension {}'.format(ext))
+            return 2  # Return a default value, that may be sufficent ... or not
+
+    length = duration(sound).info.length
+    logger.debug('Got duration: {} s'.format(length))
+    return length
+
+
 def _canonicalizePath(path):
     """
     Support passing in a pathlib.Path-like object by converting to str.
@@ -28,10 +61,12 @@ def _playsoundWin(sound, block = True):
 
     I never would have tried using windll.winmm without seeing his code.
     '''
+    raw_filename = sound
     sound = '"' + _canonicalizePath(sound) + '"'
 
     from ctypes import create_unicode_buffer, windll, wintypes
     from time   import sleep
+
     windll.winmm.mciSendStringW.argtypes = [wintypes.LPCWSTR, wintypes.LPWSTR, wintypes.UINT, wintypes.HANDLE]
     windll.winmm.mciGetErrorStringW.argtypes = [wintypes.DWORD, wintypes.LPWSTR, wintypes.UINT]
 
@@ -54,6 +89,11 @@ def _playsoundWin(sound, block = True):
         logger.debug('Starting')
         winCommand(u'open {}'.format(sound))
         winCommand(u'play {}{}'.format(sound, ' wait' if block else ''))
+
+        dur = sound_duration(raw_filename)
+        logger.debug('Waiting %f s', dur)
+        sleep(dur)
+
         logger.debug('Returning')
     finally:
         try:
@@ -172,7 +212,7 @@ def _playsoundNix(sound, block = True):
             bus.poll(Gst.MessageType.EOS, Gst.CLOCK_TIME_NONE)
         finally:
             playbin.set_state(Gst.State.NULL)
-            
+
     logger.debug('Finishing play')
 
 def _playsoundAnotherPython(otherPython, sound, block = True, macOS = False):
