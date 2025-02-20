@@ -1,0 +1,87 @@
+import mido
+import numpy as np
+from scipy.io import wavfile
+
+# Define a function to generate a square wave tone
+def generate_tone(frequency, duration, sample_rate=44100):
+    """
+    Generate a square wave tone with the specified frequency and duration.
+    
+    Args:
+        frequency (float): Frequency of the tone in Hz.
+        duration (float): Duration of the tone in seconds.
+        sample_rate (int): Sample rate in Hz (default: 44100).
+    
+    Returns:
+        numpy.ndarray: Waveform array representing the tone.
+    """
+    t = np.linspace(0, duration, int(sample_rate * duration), endpoint=False)
+    waveform = np.sign(np.sin(2 * np.pi * frequency * t))
+    return waveform
+
+# Load the MIDI file
+midi = mido.MidiFile('zelda_theme.mid')
+
+# Identify the melody track (assuming track 1 is the melody)
+melody_track = midi.tracks[1]
+
+# Extract the tempo (default to 500000 microseconds per beat if not specified)
+tempo = 500000
+for msg in midi.tracks[0]:
+    if msg.type == 'set_tempo':
+        tempo = msg.tempo
+        break
+
+# Extract notes from the melody track
+notes = []
+active_notes = {}  # Maps note_number -> (start_time_in_ticks, velocity)
+current_time = 0   # Accumulated time in MIDI ticks
+
+for msg in melody_track:
+    current_time += msg.time
+    if msg.type == 'note_on' and msg.velocity > 0:
+        # Record the start time and velocity of the note
+        active_notes[msg.note] = (current_time, msg.velocity)
+    elif (msg.type == 'note_off') or (msg.type == 'note_on' and msg.velocity == 0):
+        if msg.note in active_notes:
+            # Calculate duration and convert times to seconds
+            start_ticks, velocity = active_notes.pop(msg.note)
+            duration_ticks = current_time - start_ticks
+            start_time = mido.tick2second(start_ticks, midi.ticks_per_beat, tempo)
+            duration = mido.tick2second(duration_ticks, midi.ticks_per_beat, tempo)
+            notes.append({
+                'note_number': msg.note,
+                'start_time': start_time,
+                'duration': duration,
+                'velocity': velocity
+            })
+
+# Determine the total duration of the song
+total_duration = max(note['start_time'] + note['duration'] for note in notes)
+
+# Set the sample rate and initialize the audio array
+sample_rate = 44100
+audio = np.zeros(int(total_duration * sample_rate))
+
+# Generate and add each note's waveform to the audio array
+for note in notes:
+    # Convert MIDI note number to frequency
+    frequency = 440 * 2 ** ((note['note_number'] - 69) / 12)
+    # Generate the waveform and scale by velocity
+    waveform = generate_tone(frequency, note['duration'], sample_rate)
+    waveform *= (note['velocity'] / 127)
+    # Add the waveform to the audio array at the correct start time
+    start_sample = int(note['start_time'] * sample_rate)
+    samples = min(len(audio) - start_sample, len(waveform))
+    audio[start_sample:start_sample + samples] += waveform[:samples]
+
+# Normalize the audio to prevent clipping
+max_amplitude = np.max(np.abs(audio))
+if max_amplitude > 0:
+    audio /= max_amplitude
+
+# Convert to 16-bit integer format for WAV file
+audio_int16 = np.int16(audio * 32767)
+
+# Save the audio as a WAV file
+wavfile.write('zelda_theme.wav', sample_rate, audio_int16)
